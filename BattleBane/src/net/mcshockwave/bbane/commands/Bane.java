@@ -2,6 +2,7 @@ package net.mcshockwave.bbane.commands;
 
 import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
+import net.mcshockwave.bbane.BattleBane;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -30,6 +31,10 @@ public class Bane implements CommandExecutor {
 				
 				if (c.equalsIgnoreCase("gotoWorld")) {
 					p.teleport(Bukkit.getWorld(args[1]).getSpawnLocation());
+				}
+				
+				if (c.equalsIgnoreCase("resetWorld")) {
+					BattleBane.reset();
 				}
 
 			}

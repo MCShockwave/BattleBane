@@ -6,7 +6,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public class BattleBane extends JavaPlugin {
 
@@ -21,6 +24,17 @@ public class BattleBane extends JavaPlugin {
 		Bukkit.createWorld(new WorldCreator("BattleBaneLobby").type(WorldType.FLAT));
 		Bukkit.createWorld(new WorldCreator("BattleBaneArena").type(WorldType.FLAT));
 		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").type(WorldType.NORMAL));
+	}
+
+	public static void reset() {
+		Bukkit.broadcastMessage("§cRESETTING WORLD");
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			p.teleport(lob().getSpawnLocation());
+		}
+		
+		Bukkit.unloadWorld(wor(), false);
+		File wfile = new File("BattleBaneWorld/");
+		wfile.delete();
 	}
 
 	public static World lob() {
