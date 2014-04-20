@@ -20,7 +20,7 @@ public class BattleBane extends JavaPlugin {
 
 		Bukkit.createWorld(new WorldCreator("BattleBaneLobby"));
 		Bukkit.createWorld(new WorldCreator("BattleBaneArena"));
-		Bukkit.createWorld(new WorldCreator("BattleBaneArena").type(WorldType.NORMAL));
+		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").type(WorldType.NORMAL));
 	}
 
 	public static World lob() {
