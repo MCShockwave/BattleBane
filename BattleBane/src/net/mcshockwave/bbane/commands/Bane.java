@@ -36,6 +36,10 @@ public class Bane implements CommandExecutor {
 				if (c.equalsIgnoreCase("resetWorld")) {
 					BattleBane.reset();
 				}
+				
+				if (c.equalsIgnoreCase("genStructures")) {
+					BattleBane.genStructures();
+				}
 
 			}
 		}
