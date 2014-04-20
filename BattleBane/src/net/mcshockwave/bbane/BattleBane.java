@@ -23,18 +23,26 @@ public class BattleBane extends JavaPlugin {
 
 		Bukkit.createWorld(new WorldCreator("BattleBaneLobby").type(WorldType.FLAT));
 		Bukkit.createWorld(new WorldCreator("BattleBaneArena").type(WorldType.FLAT));
-		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").type(WorldType.NORMAL));
+		genWorld();
 	}
 
 	public static void reset() {
-		Bukkit.broadcastMessage("§cRESETTING WORLD");
+		Bukkit.broadcastMessage("§cRESETTING WORLD, PREPARE FOR LAG");
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.teleport(lob().getSpawnLocation());
 		}
-		
+
 		Bukkit.unloadWorld(wor(), false);
-		File wfile = new File("BattleBaneWorld/");
-		wfile.delete();
+		try {
+			File wfile = wor().getWorldFolder();
+			wfile.delete();
+		} catch (Exception e) {
+		}
+		genWorld();
+	}
+	
+	public static void genWorld() {
+		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").type(WorldType.NORMAL));
 	}
 
 	public static World lob() {
