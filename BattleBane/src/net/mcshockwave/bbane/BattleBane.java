@@ -70,7 +70,7 @@ public class BattleBane extends JavaPlugin {
 		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").type(WorldType.NORMAL));
 
 		wor().setSpawnLocation(0, wor().getHighestBlockYAt(0, 0) + 1, 0);
-		
+
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
 				genStructures();
@@ -83,11 +83,14 @@ public class BattleBane extends JavaPlugin {
 			Block b = wor().getHighestBlockAt(t.x, t.z);
 			b.getChunk().load();
 
-			b.setType(Material.SIGN);
+			b.setType(Material.SIGN_POST);
 
-			Sign s = (Sign) b.getState();
-			s.setLine(1, t.c + t.name());
-			s.update();
+			try {
+				Sign s = (Sign) b.getState();
+				s.setLine(1, t.c + t.name());
+				s.update();
+			} catch (Exception e) {
+			}
 		}
 	}
 
