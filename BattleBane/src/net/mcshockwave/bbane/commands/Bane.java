@@ -45,17 +45,16 @@ public class Bane implements CommandExecutor {
 				}
 				
 				if (c.equalsIgnoreCase("add")) {
-					Player pl = args.length > 1 ? Bukkit.getPlayer(args[2]) : p;
+					Player pl = args.length > 2 ? Bukkit.getPlayer(args[2]) : p;
 					BBTeam te = BBTeam.valueOf(WordUtils.capitalizeFully(args[1]));
 					
 					te.addPlayer(pl);
 				}
 				
 				if (c.equalsIgnoreCase("remove")) {
-					Player pl = args.length > 1 ? Bukkit.getPlayer(args[2]) : p;
-					BBTeam te = BBTeam.valueOf(WordUtils.capitalizeFully(args[1]));
+					Player pl = args.length > 1 ? Bukkit.getPlayer(args[1]) : p;
 					
-					te.removePlayer(pl);
+					BBTeam.removePlayer(pl);
 				}
 
 			}

@@ -38,7 +38,7 @@ public enum BBTeam {
 		this.z = z;
 		this.c = c;
 		
-		this.spawn = new Location(BattleBane.wor(), x, 64, z);
+		this.spawn = new Location(BattleBane.wor(), x + 0.5, 64, z + 0.5);
 		
 		Team t = BattleBane.score.getTeam(name());
 		if (t != null) {
@@ -54,11 +54,16 @@ public enum BBTeam {
 	
 	public void addPlayer(Player p) {
 		team.addPlayer(p);
+		spawn.getChunk().load();
 		p.teleport(spawn);
 	}
 	
-	public void removePlayer(Player p) {
-		team.removePlayer(p);
+	public static void removePlayer(Player p) {
+		Team pt = BattleBane.score.getPlayerTeam(p);
+		if (pt != null) {
+			pt.removePlayer(p);
+		}
+		BattleBane.lob().getSpawnLocation().getChunk().load();
 		p.teleport(BattleBane.lob().getSpawnLocation());
 	}
 
