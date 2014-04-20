@@ -17,9 +17,9 @@ public class BattleBane extends JavaPlugin {
 		
 		getCommand("bane").setExecutor(new Bane());
 		
-		Bukkit.createWorld(new WorldCreator(lob().getName()));
-		Bukkit.createWorld(new WorldCreator(are().getName()));
-		Bukkit.createWorld(new WorldCreator(wor().getName()));
+		Bukkit.createWorld(new WorldCreator("BattleBaneLobby"));
+		Bukkit.createWorld(new WorldCreator("BattleBaneArena"));
+		Bukkit.createWorld(new WorldCreator("BattleBaneWorld"));
 	}
 	
 	public static World lob() {
