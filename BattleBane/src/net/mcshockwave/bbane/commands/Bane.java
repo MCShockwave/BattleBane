@@ -3,6 +3,7 @@ package net.mcshockwave.bbane.commands;
 import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
 import net.mcshockwave.bbane.BattleBane;
+import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -10,6 +11,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import org.apache.commons.lang.WordUtils;
 
 public class Bane implements CommandExecutor {
 
@@ -39,6 +42,20 @@ public class Bane implements CommandExecutor {
 				
 				if (c.equalsIgnoreCase("genStructures")) {
 					BattleBane.genStructures();
+				}
+				
+				if (c.equalsIgnoreCase("add")) {
+					Player pl = args.length > 1 ? Bukkit.getPlayer(args[2]) : p;
+					BBTeam te = BBTeam.valueOf(WordUtils.capitalizeFully(args[1]));
+					
+					te.addPlayer(pl);
+				}
+				
+				if (c.equalsIgnoreCase("remove")) {
+					Player pl = args.length > 1 ? Bukkit.getPlayer(args[2]) : p;
+					BBTeam te = BBTeam.valueOf(WordUtils.capitalizeFully(args[1]));
+					
+					te.removePlayer(pl);
 				}
 
 			}
