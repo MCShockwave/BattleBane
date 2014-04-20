@@ -3,6 +3,7 @@ package net.mcshockwave.bbane.commands;
 import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
 
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,7 +17,16 @@ public class Bane implements CommandExecutor {
 			Player p = (Player) sender;
 
 			if (SQLTable.hasRank(p.getName(), Rank.JR_MOD)) {
-				// do stuff
+				String c = args[0];
+
+				if (c.equalsIgnoreCase("setspawn")) {
+					Location l = p.getLocation();
+
+					p.sendMessage(String.format("§cSpawn set to x%s y%s z%s in world " + p.getWorld().getName(),
+							l.getBlockX(), l.getBlockY(), l.getBlockZ()));
+					p.getWorld().setSpawnLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
+				}
+
 			}
 		}
 
