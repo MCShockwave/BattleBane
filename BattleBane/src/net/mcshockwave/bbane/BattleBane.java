@@ -5,6 +5,7 @@ import net.mcshockwave.bbane.commands.Bane;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BattleBane extends JavaPlugin {
@@ -19,7 +20,10 @@ public class BattleBane extends JavaPlugin {
 		
 		Bukkit.createWorld(new WorldCreator("BattleBaneLobby"));
 		Bukkit.createWorld(new WorldCreator("BattleBaneArena"));
-		Bukkit.createWorld(new WorldCreator("BattleBaneWorld"));
+		
+		WorldCreator world = new WorldCreator("BattleBaneWorld");
+		world.type(WorldType.NORMAL);
+		Bukkit.createWorld(world);
 	}
 	
 	public static World lob() {
