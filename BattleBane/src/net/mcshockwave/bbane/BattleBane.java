@@ -27,37 +27,38 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void reset() {
-		Bukkit.broadcastMessage("§cRESETTING WORLD, PREPARE FOR LAG");
+		Bukkit.broadcastMessage("§c§nRESETTING WORLD, PREPARE FOR LAG");
+		Bukkit.broadcastMessage(" ");
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.teleport(lob().getSpawnLocation());
 		}
 
-		Bukkit.unloadWorld(wor(), false);
-		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
-			public void run() {
-				try {
-					File wfile = wor().getWorldFolder();
-					deleteFolder(wfile);
-				} catch (Exception e) {
-				}
-				genWorld();
-			}
-		}, 10l);
+		if (Bukkit.unloadWorld(wor(), true)) {
+			System.out.println("Unloaded world");
+		} else {
+			System.err.println("Couldn't unload world");
+		}
+		if (delete(new File("BattleBaneWorld"))) {
+			System.out.println("Deleted world!");
+			WorldCreator wc = new WorldCreator("worldname");
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+			Bukkit.reload();
+		} else {
+			System.err.println("Couldn't delete world");
+		}
+
+		genWorld();
 	}
 
-	// copypaste
-	public static void deleteFolder(File folder) {
-		File[] files = folder.listFiles();
-		if (files != null) {
-			for (File f : files) {
-				if (f.isDirectory()) {
-					deleteFolder(f);
-				} else {
-					f.delete();
-				}
-			}
-		}
-		folder.delete();
+	public static boolean delete(File file) {
+		if (file.isDirectory())
+			for (File subfile : file.listFiles())
+				if (!delete(subfile))
+					return false;
+		if (!file.delete())
+			return false;
+		return true;
 	}
 
 	public static void genWorld() {

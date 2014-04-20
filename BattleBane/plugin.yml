@@ -2,5 +2,6 @@ name: BattleBane
 main: net.mcshockwave.bbane.BattleBane
 version: 1.0
 author: Blaxcraft
+description: Alpha - WorldGen
 commands:
    bane:
