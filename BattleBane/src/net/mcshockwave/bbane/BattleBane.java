@@ -37,14 +37,29 @@ public class BattleBane extends JavaPlugin {
 			public void run() {
 				try {
 					File wfile = wor().getWorldFolder();
-					wfile.delete();
+					deleteFolder(wfile);
 				} catch (Exception e) {
 				}
 				genWorld();
 			}
 		}, 10l);
 	}
-	
+
+	// copypaste
+	public static void deleteFolder(File folder) {
+		File[] files = folder.listFiles();
+		if (files != null) {
+			for (File f : files) {
+				if (f.isDirectory()) {
+					deleteFolder(f);
+				} else {
+					f.delete();
+				}
+			}
+		}
+		folder.delete();
+	}
+
 	public static void genWorld() {
 		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").type(WorldType.NORMAL));
 	}
