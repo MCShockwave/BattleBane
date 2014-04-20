@@ -1,11 +1,15 @@
 package net.mcshockwave.bbane;
 
 import net.mcshockwave.bbane.commands.Bane;
+import net.mcshockwave.bbane.teams.Team;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -64,6 +68,19 @@ public class BattleBane extends JavaPlugin {
 
 	public static void genWorld() {
 		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").type(WorldType.NORMAL));
+
+		wor().setSpawnLocation(0, wor().getHighestBlockYAt(0, 0) + 1, 0);
+
+		for (Team t : Team.values()) {
+			Block b = wor().getHighestBlockAt(t.x, t.z);
+			b.getChunk().load();
+			
+			b.setType(Material.SIGN);
+			
+			Sign s = (Sign) b.getState();
+			s.setLine(1, t.c + t.name());
+			s.update();
+		}
 	}
 
 	public static World lob() {
