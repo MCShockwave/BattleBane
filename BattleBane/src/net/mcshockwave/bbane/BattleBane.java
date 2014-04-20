@@ -49,6 +49,7 @@ public class BattleBane extends JavaPlugin {
 		}
 
 		genWorld();
+		Bukkit.broadcastMessage("§aDONE");
 	}
 
 	public static boolean delete(File file) {
