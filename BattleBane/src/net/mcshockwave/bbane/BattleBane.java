@@ -33,12 +33,16 @@ public class BattleBane extends JavaPlugin {
 		}
 
 		Bukkit.unloadWorld(wor(), false);
-		try {
-			File wfile = wor().getWorldFolder();
-			wfile.delete();
-		} catch (Exception e) {
-		}
-		genWorld();
+		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+			public void run() {
+				try {
+					File wfile = wor().getWorldFolder();
+					wfile.delete();
+				} catch (Exception e) {
+				}
+				genWorld();
+			}
+		}, 10l);
 	}
 	
 	public static void genWorld() {
