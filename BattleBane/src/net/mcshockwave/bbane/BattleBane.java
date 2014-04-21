@@ -16,6 +16,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.File;
+import java.util.logging.Level;
+
+import com.khorn.terraincontrol.LocalWorld;
+import com.khorn.terraincontrol.TerrainControl;
+import com.khorn.terraincontrol.TerrainControlEngine;
 
 public class BattleBane extends JavaPlugin {
 
@@ -69,8 +74,6 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void genWorld() {
-		Bukkit.getPluginManager().enablePlugin(Bukkit.getPluginManager().getPlugin("TerrainControl"));
-
 		WorldCreator c = new WorldCreator("BattleBaneWorld");
 		c.generator("TerrainControl");
 		c.generateStructures(true);
@@ -83,7 +86,6 @@ public class BattleBane extends JavaPlugin {
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
 				genStructures();
-				Bukkit.getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("TerrainControl"));
 			}
 		}, 50l);
 	}
