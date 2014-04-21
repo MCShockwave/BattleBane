@@ -50,10 +50,6 @@ public class BattleBane extends JavaPlugin {
 		}
 		if (delete(new File("BattleBaneWorld"))) {
 			System.out.println("Deleted world!");
-			WorldCreator wc = new WorldCreator("worldname");
-			wc.type(WorldType.NORMAL);
-			wc.createWorld();
-			Bukkit.reload();
 		} else {
 			System.err.println("Couldn't delete world");
 		}
