@@ -18,7 +18,12 @@ public enum BBKit {
 		Material.IRON_PICKAXE,
 		1,
 		0,
-		new ItemStack(Material.WOOD_PICKAXE));
+		new ItemStack(Material.WOOD_PICKAXE)),
+	Demoman(
+		Material.TNT,
+		3,
+		0,
+		new ItemStack(Material.TNT, 3));
 
 	protected static HashMap<String, BBKit>	used	= new HashMap<>();
 

@@ -5,17 +5,22 @@ import net.mcshockwave.MCS.Menu.ItemMenu;
 import net.mcshockwave.MCS.Menu.ItemMenu.Button;
 import net.mcshockwave.MCS.Menu.ItemMenu.ButtonRunnable;
 import net.mcshockwave.MCS.Utils.ItemMetaUtils;
+import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -56,6 +61,23 @@ public class DefaultListener implements Listener {
 	}
 
 	@EventHandler
+	public void onPlayerDeath(PlayerDeathEvent event) {
+		Player p = event.getEntity();
+
+		if (BBKit.Demoman.isKit(p)) {
+			TNTPrimed tnt = (TNTPrimed) p.getWorld().spawnEntity(p.getLocation().add(0.5, 1.5, 0.5),
+					EntityType.PRIMED_TNT);
+			tnt.setFuseTicks(300);
+
+			for (Player p2 : Bukkit.getOnlinePlayers()) {
+				if (p2.getWorld() == p.getWorld() && p2.getLocation().distanceSquared(p.getLocation()) < 16 * 16) {
+					p2.sendMessage("§cYou have 15 seconds to loot the body of " + p.getName());
+				}
+			}
+		}
+	}
+
+	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Player p = event.getPlayer();
 		Action a = event.getAction();
@@ -73,6 +95,25 @@ public class DefaultListener implements Listener {
 							public void run(Player p, InventoryClickEvent event) {
 								cs.onUse(p);
 								MCShockwave.send(ChatColor.GREEN, p, "Used class %s", cs.name);
+							}
+						});
+
+						cl.addButton(b, i);
+					}
+
+					cl.open(p);
+				}
+
+				if (it.getType() == Material.WOOL && ItemMetaUtils.hasCustomName(it)) {
+					ItemMenu cl = new ItemMenu("Team Selection", BBTeam.values().length);
+
+					for (int i = 0; i < BBTeam.values().length; i++) {
+						final BBTeam t = BBTeam.values()[i];
+						Button b = new Button(true, Material.WOOL, 1, t.data, t.c + t.name(), "", "Click to join");
+						b.setOnClick(new ButtonRunnable() {
+							public void run(Player p, InventoryClickEvent event) {
+								t.addPlayer(p);
+								MCShockwave.send(t.c, p, "Joined team %s", t.name());
 							}
 						});
 
@@ -106,6 +147,21 @@ public class DefaultListener implements Listener {
 			} else {
 				b.breakNaturally(p.getItemInHand().clone());
 			}
+		}
+	}
+
+	@EventHandler
+	public void onBlockPlace(BlockPlaceEvent event) {
+		Player p = event.getPlayer();
+		Block b = event.getBlock();
+
+		if (BBKit.Demoman.isKit(p) && b.getType() == Material.TNT) {
+			b.setType(Material.AIR);
+			b.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, Material.TNT);
+
+			TNTPrimed tnt = (TNTPrimed) b.getWorld().spawnEntity(b.getLocation().add(0.5, 0.5, 0.5),
+					EntityType.PRIMED_TNT);
+			tnt.setFuseTicks(40);
 		}
 	}
 }

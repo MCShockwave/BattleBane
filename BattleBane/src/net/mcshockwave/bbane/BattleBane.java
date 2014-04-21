@@ -23,8 +23,8 @@ public class BattleBane extends JavaPlugin {
 	public static BattleBane	ins;
 
 	public static Scoreboard	score;
-	
-	public static boolean started = false;
+
+	public static boolean		started	= false;
 
 	public void onEnable() {
 		ins = this;
@@ -74,16 +74,24 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void genWorld() {
-		Plugin p = Bukkit.getPluginManager().getPlugin("TerrainControl");
-		if (!p.isEnabled()) {
-			Bukkit.getPluginManager().enablePlugin(p);
+		boolean en = true;
+		try {
+			Plugin p = Bukkit.getPluginManager().getPlugin("TerrainControl");
+			if (!p.isEnabled()) {
+				Bukkit.getPluginManager().enablePlugin(p);
+			}
+		} catch (Exception e) {
+			en = false;
+			Bukkit.broadcastMessage("§cTerrainControl has thrown an error, defaulting to normal world generation");
 		}
 
 		WorldCreator c = new WorldCreator("BattleBaneWorld");
-		try {
-			c.generator("TerrainControl");
-		} catch (Exception e) {
-			Bukkit.broadcastMessage("§cTerrainControl has thrown an error, defaulting to normal world generation");
+		if (en) {
+			try {
+				c.generator("TerrainControl");
+			} catch (Exception e) {
+				Bukkit.broadcastMessage("§cTerrainControl has thrown an error, defaulting to normal world generation");
+			}
 		}
 		c.generateStructures(true);
 		c.type(WorldType.NORMAL);
