@@ -6,6 +6,7 @@ import net.mcshockwave.MCS.Menu.ItemMenu.Button;
 import net.mcshockwave.MCS.Menu.ItemMenu.ButtonRunnable;
 import net.mcshockwave.MCS.Utils.ItemMetaUtils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -31,13 +32,17 @@ public class DefaultListener implements Listener {
 
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		Player p = event.getPlayer();
+		final Player p = event.getPlayer();
 
 		if (BattleBane.started) {
 			event.setRespawnLocation(BattleBane.wor().getSpawnLocation());
 
-			BBKit c = BBKit.getClassFor(p);
-			c.giveKit(p);
+			Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
+				public void run() {
+					BBKit c = BBKit.getClassFor(p);
+					c.giveKit(p);	
+				}
+			}, 10l);
 		} else {
 			event.setRespawnLocation(BattleBane.lob().getSpawnLocation());
 		}
