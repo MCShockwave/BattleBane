@@ -5,7 +5,6 @@ import net.mcshockwave.MCS.Menu.ItemMenu;
 import net.mcshockwave.MCS.Menu.ItemMenu.Button;
 import net.mcshockwave.MCS.Menu.ItemMenu.ButtonRunnable;
 import net.mcshockwave.MCS.Utils.ItemMetaUtils;
-import net.mcshockwave.bbane.classes.Classes;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -37,7 +36,7 @@ public class DefaultListener implements Listener {
 		if (BattleBane.started) {
 			event.setRespawnLocation(BattleBane.wor().getSpawnLocation());
 
-			Classes c = Classes.getClassFor(p);
+			BBKit c = BBKit.getClassFor(p);
 			c.giveKit(p);
 		} else {
 			event.setRespawnLocation(BattleBane.lob().getSpawnLocation());
@@ -53,10 +52,10 @@ public class DefaultListener implements Listener {
 		if (it != null && it.getType() != Material.AIR) {
 			if (a.name().contains("RIGHT_CLICK")) {
 				if (it.getType() == Material.NETHER_STAR && ItemMetaUtils.hasCustomName(it)) {
-					ItemMenu cl = new ItemMenu("Classes", Classes.values().length);
+					ItemMenu cl = new ItemMenu("Classes", BBKit.values().length);
 
-					for (int i = 0; i < Classes.values().length; i++) {
-						final Classes cs = Classes.values()[i];
+					for (int i = 0; i < BBKit.values().length; i++) {
+						final BBKit cs = BBKit.values()[i];
 						Button b = new Button(true, cs.ico, cs.am, cs.da, cs.name, "", "Click to use");
 						b.setOnClick(new ButtonRunnable() {
 							public void run(Player p, InventoryClickEvent event) {
