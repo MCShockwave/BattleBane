@@ -12,6 +12,7 @@ import org.bukkit.WorldType;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -69,6 +70,11 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void genWorld() {
+		Plugin p = Bukkit.getPluginManager().getPlugin("TerrainControl");
+		if (!p.isEnabled()) {
+			Bukkit.getPluginManager().enablePlugin(p);
+		}
+		
 		WorldCreator c = new WorldCreator("BattleBaneWorld");
 		c.generator("TerrainControl");
 		c.generateStructures(true);
