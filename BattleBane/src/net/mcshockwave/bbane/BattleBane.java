@@ -36,7 +36,7 @@ public class BattleBane extends JavaPlugin {
 		Bukkit.createWorld(new WorldCreator("BattleBaneArena").type(WorldType.FLAT));
 		genWorld();
 	}
-	
+
 	public void onDisable() {
 	}
 
@@ -59,7 +59,6 @@ public class BattleBane extends JavaPlugin {
 		}
 
 		genWorld();
-		Bukkit.broadcastMessage("§aDONE");
 	}
 
 	public static boolean delete(File file) {
@@ -82,7 +81,7 @@ public class BattleBane extends JavaPlugin {
 		try {
 			c.generator("TerrainControl");
 		} catch (Exception e) {
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
+			Bukkit.broadcastMessage("§cTerrainControl has thrown an error, defaulting to normal world generation");
 		}
 		c.generateStructures(true);
 		c.type(WorldType.NORMAL);
