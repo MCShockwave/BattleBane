@@ -16,11 +16,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.File;
-import java.util.logging.Level;
-
-import com.khorn.terraincontrol.LocalWorld;
-import com.khorn.terraincontrol.TerrainControl;
-import com.khorn.terraincontrol.TerrainControlEngine;
 
 public class BattleBane extends JavaPlugin {
 
