@@ -56,6 +56,11 @@ public class Bane implements CommandExecutor {
 					
 					BBTeam.removePlayer(pl);
 				}
+				
+				if (c.equalsIgnoreCase("togstarted")) {
+					BattleBane.started = !BattleBane.started;
+					p.sendMessage("§aStarted is now " + BattleBane.started);
+				}
 
 			}
 		}

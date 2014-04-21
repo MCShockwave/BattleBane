@@ -23,6 +23,8 @@ public class BattleBane extends JavaPlugin {
 	public static BattleBane	ins;
 
 	public static Scoreboard	score;
+	
+	public static boolean started = false;
 
 	public void onEnable() {
 		ins = this;
