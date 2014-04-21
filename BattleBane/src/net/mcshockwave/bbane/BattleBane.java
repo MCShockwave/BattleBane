@@ -74,9 +74,13 @@ public class BattleBane extends JavaPlugin {
 		if (!p.isEnabled()) {
 			Bukkit.getPluginManager().enablePlugin(p);
 		}
-		
+
 		WorldCreator c = new WorldCreator("BattleBaneWorld");
-		c.generator("TerrainControl");
+		try {
+			c.generator("TerrainControl");
+		} catch (Exception e) {
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
+		}
 		c.generateStructures(true);
 		c.type(WorldType.NORMAL);
 		c.environment(Environment.NORMAL);

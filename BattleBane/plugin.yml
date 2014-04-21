@@ -3,7 +3,6 @@ main: net.mcshockwave.bbane.BattleBane
 version: 1.0
 author: Blaxcraft
 description: Alpha - WorldGen/Teams
-depend: [MCShockwave]
-softdepend: [TerrainControl]
+depend: [MCShockwave, TerrainControl]
 commands:
    bane:
