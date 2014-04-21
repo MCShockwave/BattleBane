@@ -72,7 +72,7 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void genWorld() {
-		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").type(WorldType.NORMAL));
+		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").generator("TerrainControl"));
 
 		wor().setSpawnLocation(0, wor().getHighestBlockYAt(0, 0) + 1, 0);
 
