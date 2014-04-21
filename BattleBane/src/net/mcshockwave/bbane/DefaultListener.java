@@ -8,18 +8,25 @@ import net.mcshockwave.MCS.Utils.ItemMetaUtils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Effect;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Random;
+
 public class DefaultListener implements Listener {
+
+	Random	rand	= new Random();
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
@@ -40,7 +47,7 @@ public class DefaultListener implements Listener {
 			Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
 				public void run() {
 					BBKit c = BBKit.getClassFor(p);
-					c.giveKit(p);	
+					c.giveKit(p);
 				}
 			}, 10l);
 		} else {
@@ -74,6 +81,30 @@ public class DefaultListener implements Listener {
 
 					cl.open(p);
 				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void onBlockBreak(BlockBreakEvent event) {
+		Player p = event.getPlayer();
+		Block b = event.getBlock();
+
+		if (BBKit.Miner.isKit(p)) {
+			event.setCancelled(true);
+			Material or = b.getType();
+
+			if ((or == Material.IRON_ORE || or == Material.GOLD_ORE) && rand.nextInt(4) == 0) {
+				if (or == Material.IRON_ORE) {
+					b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.IRON_INGOT));
+				}
+				if (or == Material.GOLD_ORE) {
+					b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.GOLD_INGOT));
+				}
+				b.getWorld().playEffect(b.getLocation(), Effect.MOBSPAWNER_FLAMES, 0);
+				b.breakNaturally(null);
+			} else {
+				b.breakNaturally(p.getItemInHand().clone());
 			}
 		}
 	}

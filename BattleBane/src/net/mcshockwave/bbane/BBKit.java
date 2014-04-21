@@ -13,15 +13,20 @@ public enum BBKit {
 	Civilian(
 		Material.WORKBENCH,
 		1,
-		0);
+		0),
+	Miner(
+		Material.IRON_PICKAXE,
+		1,
+		0,
+		new ItemStack(Material.WOOD_PICKAXE));
 
 	protected static HashMap<String, BBKit>	used	= new HashMap<>();
 
-	public Material								ico;
-	public int									am, da;
-	public String								name;
+	public Material							ico;
+	public int								am, da;
+	public String							name;
 
-	public ItemStack[]							kit;
+	public ItemStack[]						kit;
 
 	private BBKit(Material ico, int am, int da, ItemStack... items) {
 		this.ico = ico;
@@ -55,7 +60,7 @@ public enum BBKit {
 		p.getInventory().addItem(kit);
 
 		if (this == Civilian) {
-			p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1));
+			p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0));
 		}
 	}
 
