@@ -73,14 +73,21 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void genWorld() {
-		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").environment(Environment.NORMAL).generator(
-				"TerrainControl"));
+		Bukkit.getPluginManager().enablePlugin(Bukkit.getPluginManager().getPlugin("TerrainControl"));
+
+		WorldCreator c = new WorldCreator("BattleBaneWorld");
+		c.generator("TerrainControl");
+		c.generateStructures(true);
+		c.type(WorldType.NORMAL);
+		c.environment(Environment.NORMAL);
+		c.createWorld();
 
 		wor().setSpawnLocation(0, wor().getHighestBlockYAt(0, 0) + 1, 0);
 
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
 				genStructures();
+				Bukkit.getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("TerrainControl"));
 			}
 		}, 50l);
 	}

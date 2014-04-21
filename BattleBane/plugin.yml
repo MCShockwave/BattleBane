@@ -5,6 +5,5 @@ author: Blaxcraft
 description: Alpha - WorldGen/Teams
 depend: [MCShockwave]
 softdepend: [TerrainControl]
-load: STARTUP
 commands:
    bane:
