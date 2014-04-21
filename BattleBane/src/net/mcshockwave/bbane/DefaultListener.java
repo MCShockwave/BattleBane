@@ -87,6 +87,7 @@ public class DefaultListener implements Listener {
 			if (a.name().contains("RIGHT_CLICK")) {
 				if (it.getType() == Material.NETHER_STAR && ItemMetaUtils.hasCustomName(it)) {
 					ItemMenu cl = new ItemMenu("Classes", BBKit.values().length);
+					event.setCancelled(true);
 
 					for (int i = 0; i < BBKit.values().length; i++) {
 						final BBKit cs = BBKit.values()[i];
@@ -106,14 +107,15 @@ public class DefaultListener implements Listener {
 
 				if (it.getType() == Material.WOOL && ItemMetaUtils.hasCustomName(it)) {
 					ItemMenu cl = new ItemMenu("Team Selection", BBTeam.values().length);
+					event.setCancelled(true);
 
 					for (int i = 0; i < BBTeam.values().length; i++) {
 						final BBTeam t = BBTeam.values()[i];
 						Button b = new Button(true, Material.WOOL, 1, t.data, t.c + t.name(), "", "Click to join");
 						b.setOnClick(new ButtonRunnable() {
 							public void run(Player p, InventoryClickEvent event) {
-								t.addPlayer(p);
 								MCShockwave.send(t.c, p, "Joined team %s", t.name());
+								t.addPlayer(p);
 							}
 						});
 

@@ -74,4 +74,20 @@ public enum BBTeam {
 		p.teleport(BattleBane.lob().getSpawnLocation());
 	}
 
+	public static BBTeam getTeamFor(Player p) {
+		for (BBTeam t : values()) {
+			if (t.isTeam(p)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	public boolean isTeam(Player p) {
+		if (BattleBane.score.getPlayerTeam(p) == null) {
+			return false;
+		}
+		return getTeamFor(p) == this;
+	}
+
 }
