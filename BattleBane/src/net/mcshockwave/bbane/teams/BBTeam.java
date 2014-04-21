@@ -1,5 +1,6 @@
 package net.mcshockwave.bbane.teams;
 
+import net.mcshockwave.bbane.BBKit;
 import net.mcshockwave.bbane.BattleBane;
 
 import org.bukkit.ChatColor;
@@ -63,6 +64,10 @@ public enum BBTeam {
 		team.addPlayer(p);
 		spawn.getChunk().load();
 		p.teleport(spawn);
+		
+		if (BBKit.getClassFor(p) != null) {
+			BBKit.getClassFor(p).giveKit(p);
+		}
 	}
 
 	public static void removePlayer(Player p) {
