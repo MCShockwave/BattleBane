@@ -36,6 +36,9 @@ public class BattleBane extends JavaPlugin {
 		Bukkit.createWorld(new WorldCreator("BattleBaneArena").type(WorldType.FLAT));
 		genWorld();
 	}
+	
+	public void onDisable() {
+	}
 
 	public static void reset() {
 		Bukkit.broadcastMessage("§c§nRESETTING WORLD, PREPARE FOR LAG");
