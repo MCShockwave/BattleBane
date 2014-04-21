@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -15,6 +16,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.File;
+
+import com.khorn.terraincontrol.TerrainControl;
 
 public class BattleBane extends JavaPlugin {
 
@@ -72,7 +75,8 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void genWorld() {
-		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").generator("TerrainControl"));
+		Bukkit.createWorld(new WorldCreator("BattleBaneWorld").environment(Environment.NORMAL).generator(
+				"TerrainControl"));
 
 		wor().setSpawnLocation(0, wor().getHighestBlockYAt(0, 0) + 1, 0);
 
