@@ -39,6 +39,8 @@ public class DefaultListener implements Listener {
 
 		if (!BattleBane.started) {
 			p.teleport(BattleBane.lob().getSpawnLocation());
+			p.getInventory().clear();
+			p.getInventory().setArmorContents(null);
 		}
 	}
 
@@ -47,7 +49,10 @@ public class DefaultListener implements Listener {
 		final Player p = event.getPlayer();
 
 		if (BattleBane.started) {
-			event.setRespawnLocation(BattleBane.wor().getSpawnLocation());
+			if (BBTeam.getTeamFor(p) != null) {
+				event.setRespawnLocation(BBTeam.getTeamFor(p).spawn);
+			} else
+				event.setRespawnLocation(BattleBane.wor().getSpawnLocation());
 
 			Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
 				public void run() {
@@ -106,23 +111,28 @@ public class DefaultListener implements Listener {
 				}
 
 				if (it.getType() == Material.WOOL && ItemMetaUtils.hasCustomName(it)) {
-					ItemMenu cl = new ItemMenu("Team Selection", BBTeam.values().length);
-					event.setCancelled(true);
+					if (BBKit.getClassFor(p) != null) {
+						ItemMenu cl = new ItemMenu("Team Selection", BBTeam.values().length);
+						event.setCancelled(true);
 
-					for (int i = 0; i < BBTeam.values().length; i++) {
-						final BBTeam t = BBTeam.values()[i];
-						Button b = new Button(true, Material.WOOL, 1, t.data, t.c + t.name(), "", "Click to join");
-						b.setOnClick(new ButtonRunnable() {
-							public void run(Player p, InventoryClickEvent event) {
-								MCShockwave.send(t.c, p, "Joined team %s", t.name());
-								t.addPlayer(p);
-							}
-						});
+						for (int i = 0; i < BBTeam.values().length; i++) {
+							final BBTeam t = BBTeam.values()[i];
+							Button b = new Button(true, Material.WOOL, 1, t.data, t.c + t.name(), "", "Click to join",
+									t.team.getPlayers().size() + " players");
+							b.setOnClick(new ButtonRunnable() {
+								public void run(Player p, InventoryClickEvent event) {
+									MCShockwave.send(t.c, p, "Joined team %s", t.name());
+									t.addPlayer(p);
+								}
+							});
 
-						cl.addButton(b, i);
+							cl.addButton(b, i);
+						}
+
+						cl.open(p);
+					} else {
+						p.sendMessage("§cSelect a class before choosing a team!");
 					}
-
-					cl.open(p);
 				}
 			}
 		}

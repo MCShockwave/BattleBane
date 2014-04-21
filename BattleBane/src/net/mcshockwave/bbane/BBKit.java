@@ -62,6 +62,8 @@ public enum BBKit {
 	}
 
 	public void giveKit(Player p) {
+		p.getInventory().clear();
+		p.getInventory().setArmorContents(null);
 		p.getInventory().addItem(kit);
 
 		if (this == Civilian) {
