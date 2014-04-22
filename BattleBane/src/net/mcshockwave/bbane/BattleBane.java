@@ -1,6 +1,8 @@
 package net.mcshockwave.bbane;
 
 import net.mcshockwave.MCS.MCShockwave;
+import net.mcshockwave.MCS.SQLTable;
+import net.mcshockwave.MCS.SQLTable.Rank;
 import net.mcshockwave.bbane.commands.Bane;
 import net.mcshockwave.bbane.teams.BBTeam;
 
@@ -276,9 +278,24 @@ public class BattleBane extends JavaPlugin {
 
 				new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
 
+				if (are().getBlockAt(0, 0, 0).getType() != Material.AIR) {
+					sendToMods("§cError resetting arena map... trying again");
+					return;
+				} else {
+					sendToMods("§aArena successfully generated");
+				}
+
 				System.out.println("Done resetting world!");
 			}
 		}, 80l);
+	}
+
+	public static void sendToMods(String mes) {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			if (SQLTable.hasRank(p.getName(), Rank.JR_MOD)) {
+				p.sendMessage(mes);
+			}
+		}
 	}
 
 	public static List<Player> getAllInArena(BBTeam te) {

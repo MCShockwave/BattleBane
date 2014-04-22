@@ -120,12 +120,7 @@ public class Bane implements CommandExecutor {
 				}
 				
 				if (c.equalsIgnoreCase("reloadArena")) {
-					BattleBane.deleteWorld("BattleBaneArena");
-					new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
-					
-					BattleBane.copyWorld("BattleBaneArenaBackup", "BattleBaneArena");
-					
-					BattleBane.are().save();
+					BattleBane.resetArena();
 				}
 			}
 		}

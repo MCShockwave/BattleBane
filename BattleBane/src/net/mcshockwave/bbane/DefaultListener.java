@@ -104,6 +104,11 @@ public class DefaultListener implements Listener {
 
 		if (p.getWorld() == BattleBane.are() && BattleBane.arena) {
 			event.setDeathMessage("§8[§a§lARENA§8] §f" + event.getDeathMessage());
+			
+			PlayerRespawnEvent ev = new PlayerRespawnEvent(p, BattleBane.lob().getSpawnLocation(), false);
+			Bukkit.getPluginManager().callEvent(ev);
+			p.setHealth(20f);
+			p.teleport(ev.getRespawnLocation());
 
 			int tleft = 0;
 			BBTeam win = null;
