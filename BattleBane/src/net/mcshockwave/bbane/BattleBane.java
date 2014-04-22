@@ -19,6 +19,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -52,24 +57,27 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void reset() {
-		Bukkit.broadcastMessage("§c§nRESETTING WORLD, PREPARE FOR LAG");
-		Bukkit.broadcastMessage(" ");
+		Bukkit.broadcastMessage("§cRESETTING WORLD, PREPARE FOR LAG");
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.teleport(lob().getSpawnLocation());
 		}
 
-		if (Bukkit.unloadWorld(wor(), true)) {
+		deleteWorld(wor());
+
+		genWorld();
+	}
+
+	public static void deleteWorld(World w) {
+		if (Bukkit.unloadWorld(w, false)) {
 			System.out.println("Unloaded world");
 		} else {
 			System.err.println("Couldn't unload world");
 		}
-		if (delete(new File("BattleBaneWorld"))) {
+		if (delete(new File(w.getName()))) {
 			System.out.println("Deleted world!");
 		} else {
 			System.err.println("Couldn't delete world");
 		}
-
-		genWorld();
 	}
 
 	public static boolean delete(File file) {
@@ -80,6 +88,49 @@ public class BattleBane extends JavaPlugin {
 		if (!file.delete())
 			return false;
 		return true;
+	}
+
+	public static void copyWorld(String s, String t) {
+		File source = new File(s);
+		File target = new File(t);
+		try {
+			copyTest(source, target);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void copyTest(File src, File dest) throws IOException {
+		if (src.isDirectory()) {
+
+			if (!dest.exists()) {
+				dest.mkdir();
+				System.out.println("Directory copied from " + src + "  to " + dest);
+			}
+
+			String files[] = src.list();
+
+			for (String file : files) {
+				File srcFile = new File(src, file);
+				File destFile = new File(dest, file);
+				copyTest(srcFile, destFile);
+			}
+
+		} else {
+			InputStream in = new FileInputStream(src);
+			OutputStream out = new FileOutputStream(dest);
+
+			byte[] buffer = new byte[1024];
+
+			int length;
+			while ((length = in.read(buffer)) > 0) {
+				out.write(buffer, 0, length);
+			}
+
+			in.close();
+			out.close();
+			System.out.println("File copied from " + src + " to " + dest);
+		}
 	}
 
 	public static void genWorld() {
@@ -174,6 +225,8 @@ public class BattleBane extends JavaPlugin {
 
 				if (BBTeam.getTeamFor(p) != null) {
 					p.teleport(BBTeam.getTeamFor(p).spawn);
+				} else {
+					p.teleport(lob().getSpawnLocation());
 				}
 			}
 		}
@@ -183,6 +236,27 @@ public class BattleBane extends JavaPlugin {
 		} else {
 			MCShockwave.broadcast("%s has won on arena %s", "Nobody", currentArena.name);
 		}
+
+		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+			public void run() {
+				deleteWorld(are());
+
+				Bukkit.unloadWorld(areBuild(), true);
+			}
+		}, 10l);
+
+		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+			public void run() {
+				copyWorld("BattleBaneArenaBuild", "BattleBaneArena");
+			}
+		}, 20l);
+
+		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+			public void run() {
+				Bukkit.createWorld(new WorldCreator("BattleBaneArena").type(WorldType.FLAT));
+				Bukkit.createWorld(new WorldCreator("BattleBaneArenaBuild"));
+			}
+		}, 60l);
 
 		currentArena = null;
 	}
