@@ -66,7 +66,7 @@ public class BattleBane extends JavaPlugin {
 
 		genWorld();
 	}
-	
+
 	public static void deleteWorld(String w) {
 		if (Bukkit.unloadWorld(w, false)) {
 			System.out.println("Unloaded world");
@@ -123,7 +123,7 @@ public class BattleBane extends JavaPlugin {
 			if (src.getName().equalsIgnoreCase("uid.dat")) {
 				return;
 			}
-			
+
 			InputStream in = new FileInputStream(src);
 			OutputStream out = new FileOutputStream(dest);
 
@@ -242,7 +242,17 @@ public class BattleBane extends JavaPlugin {
 		} else {
 			MCShockwave.broadcast("%s has won on arena %s", "Nobody", currentArena.name);
 		}
-		
+
+		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+			public void run() {
+				resetArena();
+			}
+		}, 100l);
+
+		currentArena = null;
+	}
+
+	public static void resetArena() {
 		System.out.println("Deleting arena file...");
 		deleteWorld(are());
 
@@ -257,21 +267,18 @@ public class BattleBane extends JavaPlugin {
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
 				System.out.println("Saving all worlds...");
-				
+
 				for (World w : Bukkit.getWorlds()) {
 					w.save();
 				}
-				
+
 				System.out.println("Loading arena world...");
 
 				new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
-				Bukkit.getServer().getWorlds().add(are());
-				
+
 				System.out.println("Done resetting world!");
 			}
 		}, 80l);
-
-		currentArena = null;
 	}
 
 	public static List<Player> getAllInArena(BBTeam te) {
