@@ -1,5 +1,7 @@
 package net.mcshockwave.bbane;
 
+import net.mcshockwave.MCS.Utils.ItemMetaUtils;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -64,7 +66,10 @@ public enum BBKit {
 	public void giveKit(Player p) {
 		p.getInventory().clear();
 		p.getInventory().setArmorContents(null);
-		p.getInventory().addItem(kit);
+		for (ItemStack it : kit) {
+			p.getInventory().addItem(ItemMetaUtils.setLore(it, "§6Kit Item"));
+		}
+		p.getInventory().addItem(ItemMetaUtils.setLore(new ItemStack(Material.COOKED_BEEF, 8), "§6Kit Item"));
 
 		if (this == Civilian) {
 			p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0));

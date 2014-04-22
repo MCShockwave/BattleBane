@@ -10,7 +10,7 @@ import java.util.HashMap;
 public enum Arena {
 
 	Arena_1(
-		v(0, 30, -35),
+		v(-35, 30, -0),
 		v(36, 30, 0),
 		v(0, 30, 36),
 		v(0, 30, -35));

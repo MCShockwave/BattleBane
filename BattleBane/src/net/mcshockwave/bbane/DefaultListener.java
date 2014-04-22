@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -25,10 +26,12 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 import java.util.Random;
 
@@ -40,10 +43,12 @@ public class DefaultListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player p = event.getPlayer();
 
-		if (!BattleBane.started) {
+		if (!BattleBane.started || BBTeam.getTeamFor(p) == null) {
 			p.teleport(BattleBane.lob().getSpawnLocation());
 			p.getInventory().clear();
 			p.getInventory().setArmorContents(null);
+			p.getInventory().addItem(ItemMetaUtils.setItemName(new ItemStack(Material.NETHER_STAR), "Class Selector"),
+					ItemMetaUtils.setItemName(new ItemStack(Material.WOOL), "Team Selector"));
 		}
 
 		if (p.getWorld() == BattleBane.are() && BBTeam.getTeamFor(p) != null) {
@@ -97,18 +102,56 @@ public class DefaultListener implements Listener {
 			event.setRespawnLocation(BattleBane.lob().getSpawnLocation());
 		}
 	}
+	
+	@EventHandler
+	public void onPlayerDropItem(PlayerDropItemEvent event) {
+		Player p = event.getPlayer();
+		ItemStack it = event.getItemDrop().getItemStack();
+		
+		if (it != null && it.getType() != Material.AIR) {
+			if (ItemMetaUtils.hasLore(it) && ItemMetaUtils.getLoreArray(it)[0].equalsIgnoreCase("񘿾Kit Item")) {
+				event.getItemDrop().remove();
+				p.playSound(p.getLocation(), Sound.ANVIL_LAND, 1, 2);
+			}
+		}
+	}
 
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event) {
 		Player p = event.getEntity();
 
+		for (ItemStack it : event.getDrops().toArray(new ItemStack[0])) {
+			if (it != null && it.getType() != Material.AIR) {
+				if (ItemMetaUtils.hasLore(it) && ItemMetaUtils.getLoreArray(it)[0].equalsIgnoreCase("񘿾Kit Item")) {
+					event.getDrops().remove(it);
+				}
+			}
+		}
+
+		if (BBKit.Demoman.isKit(p) && p.getWorld() != BattleBane.are()) {
+			TNTPrimed tnt = (TNTPrimed) p.getWorld().spawnEntity(p.getLocation().add(0.5, 1.5, 0.5),
+					EntityType.PRIMED_TNT);
+			tnt.setFuseTicks(300);
+
+			for (Player p2 : Bukkit.getOnlinePlayers()) {
+				if (p2.getWorld() == p.getWorld() && p2.getLocation().distanceSquared(p.getLocation()) < 16 * 16) {
+					p2.sendMessage("You have 15 seconds to loot the body of " + p.getName());
+				}
+			}
+		}
+
 		if (p.getWorld() == BattleBane.are() && BattleBane.arena) {
 			event.setDeathMessage("�8[ARENA�8] " + event.getDeathMessage());
-			
+
 			PlayerRespawnEvent ev = new PlayerRespawnEvent(p, BattleBane.lob().getSpawnLocation(), false);
 			Bukkit.getPluginManager().callEvent(ev);
 			p.setHealth(20f);
 			p.teleport(ev.getRespawnLocation());
+			p.setFireTicks(0);
+			p.setFallDistance(0);
+			for (PotionEffect pe : p.getActivePotionEffects()) {
+				p.removePotionEffect(pe.getType());
+			}
 
 			int tleft = 0;
 			BBTeam win = null;
@@ -121,18 +164,6 @@ public class DefaultListener implements Listener {
 
 			if (tleft < 2) {
 				BattleBane.endArena(win);
-			}
-		}
-
-		if (BBKit.Demoman.isKit(p)) {
-			TNTPrimed tnt = (TNTPrimed) p.getWorld().spawnEntity(p.getLocation().add(0.5, 1.5, 0.5),
-					EntityType.PRIMED_TNT);
-			tnt.setFuseTicks(300);
-
-			for (Player p2 : Bukkit.getOnlinePlayers()) {
-				if (p2.getWorld() == p.getWorld() && p2.getLocation().distanceSquared(p.getLocation()) < 16 * 16) {
-					p2.sendMessage("You have 15 seconds to loot the body of " + p.getName());
-				}
 			}
 		}
 	}

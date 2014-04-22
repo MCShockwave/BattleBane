@@ -232,6 +232,10 @@ public class BattleBane extends JavaPlugin {
 				Player p = (Player) e;
 
 				if (BBTeam.getTeamFor(p) != null) {
+					p.setHealth(20f);
+					p.getInventory().clear();
+					p.getInventory().setArmorContents(null);
+					BBKit.getClassFor(p).giveKit(p);
 					p.teleport(BBTeam.getTeamFor(p).spawn);
 				} else {
 					p.teleport(lob().getSpawnLocation());
