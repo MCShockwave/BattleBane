@@ -64,7 +64,7 @@ public enum BBTeam {
 		team.addPlayer(p);
 		spawn.getChunk().load();
 		p.teleport(spawn);
-		
+
 		if (BBKit.getClassFor(p) != null) {
 			BBKit.getClassFor(p).giveKit(p);
 		}
@@ -81,7 +81,7 @@ public enum BBTeam {
 
 	public static BBTeam getTeamFor(Player p) {
 		for (BBTeam t : values()) {
-			if (t.isTeam(p)) {
+			if (t.team.hasPlayer(p)) {
 				return t;
 			}
 		}
@@ -89,10 +89,14 @@ public enum BBTeam {
 	}
 
 	public boolean isTeam(Player p) {
-		if (BattleBane.score.getPlayerTeam(p) == null) {
+		try {
+			if (getTeamFor(p) == null) {
+				return false;
+			}
+			return getTeamFor(p) == this;
+		} catch (Exception e) {
 			return false;
 		}
-		return getTeamFor(p) == this;
 	}
 
 }

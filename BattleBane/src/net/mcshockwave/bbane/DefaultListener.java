@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
@@ -20,6 +21,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -41,6 +44,32 @@ public class DefaultListener implements Listener {
 			p.teleport(BattleBane.lob().getSpawnLocation());
 			p.getInventory().clear();
 			p.getInventory().setArmorContents(null);
+		}
+	}
+
+	@EventHandler
+	public void onEntityDamage(EntityDamageEvent event) {
+		Entity ee = event.getEntity();
+
+		if (ee instanceof Player) {
+			Player p = (Player) ee;
+
+			if (event instanceof EntityDamageByEntityEvent) {
+				EntityDamageByEntityEvent ev = (EntityDamageByEntityEvent) event;
+				Entity de = ev.getDamager();
+
+				if (ev.getDamager() instanceof Player) {
+					Player d = (Player) de;
+
+					if (!pvpEnabled(p, d)) {
+						event.setCancelled(true);
+					}
+				}
+			} else {
+				if (!pvpEnabled(p, null)) {
+					event.setCancelled(true);
+				}
+			}
 		}
 	}
 
@@ -175,5 +204,21 @@ public class DefaultListener implements Listener {
 					EntityType.PRIMED_TNT);
 			tnt.setFuseTicks(40);
 		}
+	}
+
+	public static boolean pvpEnabled(Player p, Player d) {
+		if (d == null) {
+			if (p.getWorld() == BattleBane.lob()) {
+				return false;
+			}
+		} else {
+			if (BBTeam.getTeamFor(p) == null || BBTeam.getTeamFor(d) == null) {
+				return false;
+			}
+			if (p.getWorld() == BattleBane.lob() || d.getWorld() == BattleBane.lob()) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
