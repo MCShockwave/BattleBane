@@ -18,6 +18,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.File;
@@ -232,9 +233,7 @@ public class BattleBane extends JavaPlugin {
 				Player p = (Player) e;
 
 				if (BBTeam.getTeamFor(p) != null) {
-					p.setHealth(20f);
-					p.getInventory().clear();
-					p.getInventory().setArmorContents(null);
+					resetPlayer(p, true);
 					BBKit.getClassFor(p).giveKit(p);
 					p.teleport(BBTeam.getTeamFor(p).spawn);
 				} else {
@@ -284,6 +283,7 @@ public class BattleBane extends JavaPlugin {
 
 				if (are().getBlockAt(0, 0, 0).getType() != Material.AIR) {
 					sendToMods("§cError resetting arena map... trying again");
+					resetArena();
 					return;
 				} else {
 					sendToMods("§aArena successfully generated");
@@ -328,6 +328,29 @@ public class BattleBane extends JavaPlugin {
 		}
 
 		return pl;
+	}
+	
+	public static void generateCenter() {
+		
+	}
+
+	public static void resetPlayer(Player p) {
+		resetPlayer(p, false);
+	}
+
+	public static void resetPlayer(Player p, boolean clearInv) {
+		if (clearInv) {
+			p.getInventory().clear();
+			p.getInventory().setArmorContents(null);
+		}
+		p.setHealth(20f);
+		p.setFireTicks(0);
+		p.setFallDistance(0);
+		p.setFoodLevel(20);
+		p.setSaturation(10f);
+		for (PotionEffect pe : p.getActivePotionEffects()) {
+			p.removePotionEffect(pe.getType());
+		}
 	}
 
 	public static World lob() {

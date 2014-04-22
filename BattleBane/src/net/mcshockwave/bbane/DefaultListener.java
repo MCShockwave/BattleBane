@@ -24,6 +24,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -31,7 +32,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
 
 import java.util.Random;
 
@@ -102,12 +102,12 @@ public class DefaultListener implements Listener {
 			event.setRespawnLocation(BattleBane.lob().getSpawnLocation());
 		}
 	}
-	
+
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent event) {
 		Player p = event.getPlayer();
 		ItemStack it = event.getItemDrop().getItemStack();
-		
+
 		if (it != null && it.getType() != Material.AIR) {
 			if (ItemMetaUtils.hasLore(it) && ItemMetaUtils.getLoreArray(it)[0].equalsIgnoreCase("񘿾Kit Item")) {
 				event.getItemDrop().remove();
@@ -145,13 +145,8 @@ public class DefaultListener implements Listener {
 
 			PlayerRespawnEvent ev = new PlayerRespawnEvent(p, BattleBane.lob().getSpawnLocation(), false);
 			Bukkit.getPluginManager().callEvent(ev);
-			p.setHealth(20f);
+			BattleBane.resetPlayer(p, true);
 			p.teleport(ev.getRespawnLocation());
-			p.setFireTicks(0);
-			p.setFallDistance(0);
-			for (PotionEffect pe : p.getActivePotionEffects()) {
-				p.removePotionEffect(pe.getType());
-			}
 
 			int tleft = 0;
 			BBTeam win = null;
@@ -229,6 +224,12 @@ public class DefaultListener implements Listener {
 		Player p = event.getPlayer();
 		Block b = event.getBlock();
 
+		for (BBTeam bbt : BBTeam.values()) {
+			if (b.getLocation().distanceSquared(bbt.spawn) <= 50 * 50) {
+				event.setCancelled(true);
+			}
+		}
+
 		if (BBKit.Miner.isKit(p)) {
 			event.setCancelled(true);
 			Material or = b.getType();
@@ -253,6 +254,12 @@ public class DefaultListener implements Listener {
 		Player p = event.getPlayer();
 		Block b = event.getBlock();
 
+		for (BBTeam bbt : BBTeam.values()) {
+			if (b.getLocation().distanceSquared(bbt.spawn) <= 50 * 50) {
+				event.setCancelled(true);
+			}
+		}
+
 		if (BBKit.Demoman.isKit(p) && b.getType() == Material.TNT) {
 			b.setType(Material.AIR);
 			b.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, Material.TNT);
@@ -260,6 +267,17 @@ public class DefaultListener implements Listener {
 			TNTPrimed tnt = (TNTPrimed) b.getWorld().spawnEntity(b.getLocation().add(0.5, 0.5, 0.5),
 					EntityType.PRIMED_TNT);
 			tnt.setFuseTicks(40);
+		}
+	}
+
+	@EventHandler
+	public void onEntityExplode(EntityExplodeEvent event) {
+		for (BBTeam bbt : BBTeam.values()) {
+			for (Block b : event.blockList().toArray(new Block[0])) {
+				if (b.getLocation().distanceSquared(bbt.spawn) <= 50 * 50) {
+					event.blockList().remove(b);
+				}
+			}
 		}
 	}
 
