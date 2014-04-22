@@ -179,11 +179,15 @@ public class BattleBane extends JavaPlugin {
 			}
 		}
 
-		MCShockwave.broadcast(winner.c, "%s has won on arena %s", winner.name(), currentArena.name);
+		if (winner != null) {
+			MCShockwave.broadcast(winner.c, "%s has won on arena %s", winner.name(), currentArena.name);
+		} else {
+			MCShockwave.broadcast("%s has won on arena %s", "Nobody", currentArena.name);
+		}
 
 		currentArena = null;
 	}
-	
+
 	public static List<Player> getAllInArena(BBTeam te) {
 		ArrayList<Player> pl = new ArrayList<>();
 
@@ -219,11 +223,10 @@ public class BattleBane extends JavaPlugin {
 	public static World are() {
 		return Bukkit.getWorld("BattleBaneArena");
 	}
-	
+
 	public static World areBuild() {
 		return Bukkit.getWorld("BattleBaneArenaBuild");
 	}
-
 
 	public static World wor() {
 		return Bukkit.getWorld("BattleBaneWorld");
