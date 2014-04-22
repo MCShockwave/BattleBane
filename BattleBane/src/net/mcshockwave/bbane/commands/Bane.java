@@ -76,6 +76,10 @@ public class Bane implements CommandExecutor {
 						}
 					}
 				}
+				
+				if (c.equalsIgnoreCase("startarena")) {
+					
+				}
 
 			}
 		}

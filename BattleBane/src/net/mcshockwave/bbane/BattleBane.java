@@ -1,9 +1,11 @@
 package net.mcshockwave.bbane;
 
+import net.mcshockwave.MCS.MCShockwave;
 import net.mcshockwave.bbane.commands.Bane;
 import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
@@ -11,20 +13,27 @@ import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class BattleBane extends JavaPlugin {
+
+	static Random				rand			= new Random();
 
 	public static BattleBane	ins;
 
 	public static Scoreboard	score;
 
-	public static boolean		started	= true;
+	public static boolean		started			= true, arena = false;
+	public static Arena			currentArena	= null;
 
 	public void onEnable() {
 		ins = this;
@@ -36,6 +45,7 @@ public class BattleBane extends JavaPlugin {
 
 		Bukkit.createWorld(new WorldCreator("BattleBaneLobby").type(WorldType.FLAT));
 		Bukkit.createWorld(new WorldCreator("BattleBaneArena").type(WorldType.FLAT));
+		Bukkit.createWorld(new WorldCreator("BattleBaneArenaBuild").type(WorldType.FLAT));
 		genWorld();
 	}
 
@@ -137,6 +147,71 @@ public class BattleBane extends JavaPlugin {
 		}
 	}
 
+	public static void startArena() {
+		arena = true;
+
+		Arena ar = Arena.values()[rand.nextInt(Arena.values().length)];
+
+		currentArena = ar;
+
+		for (BBTeam bbt : BBTeam.values()) {
+			List<Player> ready = getArenaReady(bbt);
+			if (ready.size() > 0) {
+				for (Player p : ready) {
+					p.teleport(ar.spawns.get(bbt));
+				}
+			}
+		}
+
+		MCShockwave.broadcast(ChatColor.YELLOW, "Arena started on %s", ar.name);
+	}
+
+	public static void endArena(BBTeam winner) {
+		arena = false;
+
+		for (Entity e : are().getEntities()) {
+			if (e instanceof Player) {
+				Player p = (Player) e;
+
+				if (BBTeam.getTeamFor(p) != null) {
+					p.teleport(BBTeam.getTeamFor(p).spawn);
+				}
+			}
+		}
+
+		MCShockwave.broadcast(winner.c, "%s has won on arena %s", winner.name(), currentArena.name);
+
+		currentArena = null;
+	}
+	
+	public static List<Player> getAllInArena(BBTeam te) {
+		ArrayList<Player> pl = new ArrayList<>();
+
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			if (te.isTeam(p)) {
+				if (p.getWorld() == are() && !p.isDead() && p.isValid()) {
+					pl.add(p);
+				}
+			}
+		}
+
+		return pl;
+	}
+
+	public static List<Player> getArenaReady(BBTeam te) {
+		ArrayList<Player> pl = new ArrayList<>();
+
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			if (te.isTeam(p)) {
+				if (p.getWorld() == te.spawn.getWorld() && p.getLocation().distanceSquared(te.spawn) < 16 * 16) {
+					pl.add(p);
+				}
+			}
+		}
+
+		return pl;
+	}
+
 	public static World lob() {
 		return Bukkit.getWorld("BattleBaneLobby");
 	}
@@ -144,6 +219,11 @@ public class BattleBane extends JavaPlugin {
 	public static World are() {
 		return Bukkit.getWorld("BattleBaneArena");
 	}
+	
+	public static World areBuild() {
+		return Bukkit.getWorld("BattleBaneArenaBuild");
+	}
+
 
 	public static World wor() {
 		return Bukkit.getWorld("BattleBaneWorld");

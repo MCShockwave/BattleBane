@@ -45,6 +45,10 @@ public class DefaultListener implements Listener {
 			p.getInventory().clear();
 			p.getInventory().setArmorContents(null);
 		}
+
+		if (p.getWorld() == BattleBane.are() && BBTeam.getTeamFor(p) != null) {
+			p.teleport(BBTeam.getTeamFor(p).spawn);
+		}
 	}
 
 	@EventHandler
@@ -97,6 +101,21 @@ public class DefaultListener implements Listener {
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event) {
 		Player p = event.getEntity();
+
+		if (p.getWorld() == BattleBane.are() && BattleBane.arena) {
+			int tleft = 0;
+			BBTeam win = null;
+			for (BBTeam bbt : BBTeam.values()) {
+				if (BattleBane.getAllInArena(bbt).size() > 1) {
+					win = bbt;
+					tleft++;
+				}
+			}
+
+			if (tleft < 2) {
+				BattleBane.endArena(win);
+			}
+		}
 
 		if (BBKit.Demoman.isKit(p)) {
 			TNTPrimed tnt = (TNTPrimed) p.getWorld().spawnEntity(p.getLocation().add(0.5, 1.5, 0.5),
