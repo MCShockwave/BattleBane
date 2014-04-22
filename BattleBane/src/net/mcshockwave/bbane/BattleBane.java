@@ -5,7 +5,6 @@ import net.mcshockwave.bbane.commands.Bane;
 import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
@@ -163,7 +162,7 @@ public class BattleBane extends JavaPlugin {
 			}
 		}
 
-		MCShockwave.broadcast(ChatColor.YELLOW, "Arena started on %s", ar.name);
+		MCShockwave.broadcast("Arena started on %s", ar.name);
 	}
 
 	public static void endArena(BBTeam winner) {

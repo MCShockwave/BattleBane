@@ -9,11 +9,11 @@ import java.util.HashMap;
 
 public enum Arena {
 
-	Arena_0(
-		v(0, 30, -38),
-		v(39, 30, 0),
-		v(0, 30, 39),
-		v(0, 30, -38));
+	Arena_1(
+		v(0, 30, -35),
+		v(36, 30, 0),
+		v(0, 30, 36),
+		v(0, 30, -35));
 
 	// 0 = Red, 1 = Blue, 2 = Yellow, 3 = Green
 

@@ -106,7 +106,7 @@ public class DefaultListener implements Listener {
 			int tleft = 0;
 			BBTeam win = null;
 			for (BBTeam bbt : BBTeam.values()) {
-				if (BattleBane.getAllInArena(bbt).size() > 1) {
+				if (BattleBane.getAllInArena(bbt).size() > 0) {
 					win = bbt;
 					tleft++;
 				}
