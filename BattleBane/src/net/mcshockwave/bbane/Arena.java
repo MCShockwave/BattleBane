@@ -10,10 +10,10 @@ import java.util.HashMap;
 public enum Arena {
 
 	Arena_0(
-		v(0, 0, 0),
-		v(0, 0, 0),
-		v(0, 0, 0),
-		v(0, 0, 0));
+		v(0, 30, -38),
+		v(39, 30, 0),
+		v(0, 30, 39),
+		v(0, 30, -38));
 
 	// 0 = Red, 1 = Blue, 2 = Yellow, 3 = Green
 
@@ -30,7 +30,7 @@ public enum Arena {
 	}
 
 	private static Vector v(double x, double y, double z) {
-		return new Vector(x, y, z);
+		return new Vector(x + 0.5, y, z + 0.5);
 	}
 
 }
