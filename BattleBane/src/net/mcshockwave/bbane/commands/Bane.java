@@ -9,11 +9,16 @@ import net.mcshockwave.bbane.teams.BBTeam;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Arrays;
 
 import org.apache.commons.lang.WordUtils;
 
@@ -36,7 +41,20 @@ public class Bane implements CommandExecutor {
 				}
 
 				if (c.equalsIgnoreCase("gotoWorld")) {
-					p.teleport(Bukkit.getWorld(args[1]).getSpawnLocation());
+					String[] worlds = { "BattleBaneLobby", "BattleBaneArena", "BattleBaneArenaBuild", "BattleBaneWorld" };
+					if (!Arrays.asList(worlds).contains(args[1])) {
+						p.sendMessage("§cInvalid World: " + args[1]);
+						return false;
+					}
+					World w = Bukkit.getWorld(args[1]);
+					if (w != null) {
+						p.teleport(w.getSpawnLocation());
+					} else {
+						p.sendMessage("§cCould not find world: Loading \"" + args[1] + "\"");
+						new WorldCreator(args[1]).type(
+								args[1].equalsIgnoreCase("BattleBaneWorld") ? WorldType.NORMAL : WorldType.FLAT)
+								.createWorld();
+					}
 				}
 
 				if (c.equalsIgnoreCase("resetWorld")) {
@@ -76,18 +94,42 @@ public class Bane implements CommandExecutor {
 						}
 					}
 				}
-				
+
 				if (c.equalsIgnoreCase("startarena")) {
 					BattleBane.startArena();
 				}
-				
+
 				if (c.equalsIgnoreCase("endarena")) {
 					BattleBane.endArena(null);
+				}
+				
+				if (c.equalsIgnoreCase("save")) {
+					Bukkit.broadcastMessage("Saving build world...");
+					for (Player p2 : Bukkit.getOnlinePlayers()) {
+						if (p2.getWorld() == BattleBane.areBuild()) {
+							p2.teleport(BattleBane.lob().getSpawnLocation());
+						}
+					}
+					
+					BattleBane.areBuild().save();
+					
+					Bukkit.unloadWorld("BattleBaneArenaBuild", true);
+					BattleBane.deleteWorld("BattleBaneArenaBackup");
+					BattleBane.copyWorld("BattleBaneArenaBuild", "BattleBaneArenaBackup");
+					new WorldCreator("BattleBaneArenaBuild").createWorld();
+				}
+				
+				if (c.equalsIgnoreCase("reloadArena")) {
+					BattleBane.deleteWorld("BattleBaneArena");
+					new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
+					
+					BattleBane.copyWorld("BattleBaneArenaBackup", "BattleBaneArena");
+					
+					BattleBane.are().save();
 				}
 			}
 		}
 
 		return false;
 	}
-
 }

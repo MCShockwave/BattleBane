@@ -103,6 +103,8 @@ public class DefaultListener implements Listener {
 		Player p = event.getEntity();
 
 		if (p.getWorld() == BattleBane.are() && BattleBane.arena) {
+			event.setDeathMessage("§8[§a§lARENA§8] §f" + event.getDeathMessage());
+
 			int tleft = 0;
 			BBTeam win = null;
 			for (BBTeam bbt : BBTeam.values()) {

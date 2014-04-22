@@ -47,9 +47,9 @@ public class BattleBane extends JavaPlugin {
 
 		getCommand("bane").setExecutor(new Bane());
 
-		Bukkit.createWorld(new WorldCreator("BattleBaneLobby").type(WorldType.FLAT));
-		Bukkit.createWorld(new WorldCreator("BattleBaneArena").type(WorldType.FLAT));
-		Bukkit.createWorld(new WorldCreator("BattleBaneArenaBuild").type(WorldType.FLAT));
+		new WorldCreator("BattleBaneLobby").type(WorldType.FLAT).createWorld();
+		new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
+		new WorldCreator("BattleBaneArenaBuild").type(WorldType.FLAT).createWorld();
 		genWorld();
 	}
 
@@ -66,18 +66,22 @@ public class BattleBane extends JavaPlugin {
 
 		genWorld();
 	}
-
-	public static void deleteWorld(World w) {
+	
+	public static void deleteWorld(String w) {
 		if (Bukkit.unloadWorld(w, false)) {
 			System.out.println("Unloaded world");
 		} else {
 			System.err.println("Couldn't unload world");
 		}
-		if (delete(new File(w.getName()))) {
+		if (delete(new File(w))) {
 			System.out.println("Deleted world!");
 		} else {
 			System.err.println("Couldn't delete world");
 		}
+	}
+
+	public static void deleteWorld(World w) {
+		deleteWorld(w.getName());
 	}
 
 	public static boolean delete(File file) {
@@ -105,7 +109,6 @@ public class BattleBane extends JavaPlugin {
 
 			if (!dest.exists()) {
 				dest.mkdir();
-				System.out.println("Directory copied from " + src + "  to " + dest);
 			}
 
 			String files[] = src.list();
@@ -117,6 +120,10 @@ public class BattleBane extends JavaPlugin {
 			}
 
 		} else {
+			if (src.getName().equalsIgnoreCase("uid.dat")) {
+				return;
+			}
+			
 			InputStream in = new FileInputStream(src);
 			OutputStream out = new FileOutputStream(dest);
 
@@ -129,7 +136,6 @@ public class BattleBane extends JavaPlugin {
 
 			in.close();
 			out.close();
-			System.out.println("File copied from " + src + " to " + dest);
 		}
 	}
 
@@ -236,27 +242,34 @@ public class BattleBane extends JavaPlugin {
 		} else {
 			MCShockwave.broadcast("%s has won on arena %s", "Nobody", currentArena.name);
 		}
+		
+		System.out.println("Deleting arena file...");
+		deleteWorld(are());
 
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
-				deleteWorld(are());
+				System.out.println("Copying world files...");
 
-				Bukkit.unloadWorld(areBuild(), true);
+				copyWorld("BattleBaneArenaBackup", "BattleBaneArena");
 			}
-		}, 10l);
-
-		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
-			public void run() {
-				copyWorld("BattleBaneArenaBuild", "BattleBaneArena");
-			}
-		}, 20l);
+		}, 30l);
 
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
-				Bukkit.createWorld(new WorldCreator("BattleBaneArena").type(WorldType.FLAT));
-				Bukkit.createWorld(new WorldCreator("BattleBaneArenaBuild"));
+				System.out.println("Saving all worlds...");
+				
+				for (World w : Bukkit.getWorlds()) {
+					w.save();
+				}
+				
+				System.out.println("Loading arena world...");
+
+				new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
+				Bukkit.getServer().getWorlds().add(are());
+				
+				System.out.println("Done resetting world!");
 			}
-		}, 60l);
+		}, 80l);
 
 		currentArena = null;
 	}
