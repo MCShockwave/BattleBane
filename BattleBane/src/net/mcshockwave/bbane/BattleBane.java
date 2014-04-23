@@ -4,6 +4,7 @@ import net.mcshockwave.MCS.MCShockwave;
 import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
 import net.mcshockwave.bbane.commands.Bane;
+import net.mcshockwave.bbane.commands.BuildWorld;
 import net.mcshockwave.bbane.commands.Surface;
 import net.mcshockwave.bbane.teams.BBTeam;
 
@@ -51,6 +52,7 @@ public class BattleBane extends JavaPlugin {
 
 		getCommand("bane").setExecutor(new Bane());
 		getCommand("surface").setExecutor(new Surface());
+		getCommand("buildworld").setExecutor(new BuildWorld());
 
 		new WorldCreator("BattleBaneLobby").type(WorldType.FLAT).createWorld();
 		new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
