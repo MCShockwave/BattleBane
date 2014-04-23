@@ -42,9 +42,9 @@ import java.util.Random;
 
 public class DefaultListener implements Listener {
 
-	Random	rand	= new Random();
-	
-	public HashMap<TNTPrimed, String> demo = new HashMap<>();
+	Random								rand	= new Random();
+
+	public HashMap<TNTPrimed, String>	demo	= new HashMap<>();
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
@@ -76,7 +76,7 @@ public class DefaultListener implements Listener {
 			if (event instanceof EntityDamageByEntityEvent) {
 				EntityDamageByEntityEvent ev = (EntityDamageByEntityEvent) event;
 				Entity de = ev.getDamager();
-				
+
 				if (de instanceof TNTPrimed && demo.containsKey(de)) {
 					OfflinePlayer op = Bukkit.getOfflinePlayer(demo.get(de));
 					if (BBTeam.getTeamFor(op) == BBTeam.getTeamFor(p)) {
@@ -98,11 +98,11 @@ public class DefaultListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onFoodLevelChange(FoodLevelChangeEvent event) {
 		HumanEntity p = event.getEntity();
-		
+
 		if (p.getWorld() == BattleBane.lob()) {
 			event.setFoodLevel(20);
 		}
@@ -250,7 +250,7 @@ public class DefaultListener implements Listener {
 	public void onBlockBreak(BlockBreakEvent event) {
 		Player p = event.getPlayer();
 		Block b = event.getBlock();
-		
+
 		if (p.getGameMode() != GameMode.CREATIVE && p.getWorld() == BattleBane.lob()) {
 			event.setCancelled(true);
 			return;
@@ -286,13 +286,14 @@ public class DefaultListener implements Listener {
 	public void onBlockPlace(BlockPlaceEvent event) {
 		Player p = event.getPlayer();
 		Block b = event.getBlock();
-		
+
 		if (p.getGameMode() != GameMode.CREATIVE && p.getWorld() == BattleBane.lob()) {
 			event.setCancelled(true);
 			return;
 		}
-		
-		if (BBKit.Demoman.isKit(p) && b.getType() == Material.TNT) {
+
+		if (BBKit.Demoman.isKit(p) && b.getType() == Material.TNT
+				&& event.getBlockReplacedState().getBlock().getType() == Material.AIR) {
 			b.setType(Material.AIR);
 			b.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, Material.TNT);
 
