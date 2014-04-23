@@ -7,3 +7,4 @@ depend: [MCShockwave, TerrainControl]
 commands:
    bane:
    surface:
+   buildworld:
