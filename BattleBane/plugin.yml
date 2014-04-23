@@ -6,3 +6,4 @@ description: Alpha - WorldGen/Teams/Arena
 depend: [MCShockwave, TerrainControl]
 commands:
    bane:
+   surface:

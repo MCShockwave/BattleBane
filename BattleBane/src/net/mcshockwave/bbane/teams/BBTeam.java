@@ -5,29 +5,30 @@ import net.mcshockwave.bbane.BattleBane;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 
 public enum BBTeam {
 
 	Red(
-		1000,
-		1000,
+		500,
+		500,
 		ChatColor.RED,
 		14),
 	Blue(
-		1000,
-		-1000,
+		500,
+		-500,
 		ChatColor.AQUA,
 		3),
 	Yellow(
-		-1000,
-		1000,
+		-500,
+		500,
 		ChatColor.YELLOW,
 		4),
 	Green(
-		-1000,
-		-1000,
+		-500,
+		-500,
 		ChatColor.GREEN,
 		5);
 
@@ -79,7 +80,7 @@ public enum BBTeam {
 		p.teleport(BattleBane.lob().getSpawnLocation());
 	}
 
-	public static BBTeam getTeamFor(Player p) {
+	public static BBTeam getTeamFor(OfflinePlayer p) {
 		for (BBTeam t : values()) {
 			if (t.team.hasPlayer(p)) {
 				return t;
@@ -88,7 +89,7 @@ public enum BBTeam {
 		return null;
 	}
 
-	public boolean isTeam(Player p) {
+	public boolean isTeam(OfflinePlayer p) {
 		try {
 			if (getTeamFor(p) == null) {
 				return false;

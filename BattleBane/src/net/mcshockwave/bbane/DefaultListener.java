@@ -10,11 +10,14 @@ import net.mcshockwave.bbane.teams.BBTeam;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
@@ -25,6 +28,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -33,17 +37,23 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
 import java.util.Random;
 
 public class DefaultListener implements Listener {
 
 	Random	rand	= new Random();
+	
+	public HashMap<TNTPrimed, String> demo = new HashMap<>();
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player p = event.getPlayer();
 
 		if (!BattleBane.started || BBTeam.getTeamFor(p) == null) {
+			if (p.getGameMode() != GameMode.SURVIVAL) {
+				p.setGameMode(GameMode.SURVIVAL);
+			}
 			p.teleport(BattleBane.lob().getSpawnLocation());
 			p.getInventory().clear();
 			p.getInventory().setArmorContents(null);
@@ -56,6 +66,7 @@ public class DefaultListener implements Listener {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onEntityDamage(EntityDamageEvent event) {
 		Entity ee = event.getEntity();
@@ -66,8 +77,15 @@ public class DefaultListener implements Listener {
 			if (event instanceof EntityDamageByEntityEvent) {
 				EntityDamageByEntityEvent ev = (EntityDamageByEntityEvent) event;
 				Entity de = ev.getDamager();
+				
+				if (de instanceof TNTPrimed && demo.containsKey(de)) {
+					OfflinePlayer op = Bukkit.getOfflinePlayer(demo.get(de));
+					if (BBTeam.getTeamFor(op) == BBTeam.getTeamFor(p)) {
+						event.setCancelled(true);
+					}
+				}
 
-				if (ev.getDamager() instanceof Player) {
+				if (de instanceof Player) {
 					Player d = (Player) de;
 
 					if (!pvpEnabled(p, d)) {
@@ -79,6 +97,15 @@ public class DefaultListener implements Listener {
 					event.setCancelled(true);
 				}
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onFoodLevelChange(FoodLevelChangeEvent event) {
+		HumanEntity p = event.getEntity();
+		
+		if (p.getWorld() == BattleBane.lob()) {
+			event.setFoodLevel(20);
 		}
 	}
 
@@ -132,6 +159,7 @@ public class DefaultListener implements Listener {
 			TNTPrimed tnt = (TNTPrimed) p.getWorld().spawnEntity(p.getLocation().add(0.5, 1.5, 0.5),
 					EntityType.PRIMED_TNT);
 			tnt.setFuseTicks(300);
+			demo.put(tnt, p.getName());
 
 			for (Player p2 : Bukkit.getOnlinePlayers()) {
 				if (p2.getWorld() == p.getWorld() && p2.getLocation().distanceSquared(p.getLocation()) < 16 * 16) {
@@ -223,10 +251,16 @@ public class DefaultListener implements Listener {
 	public void onBlockBreak(BlockBreakEvent event) {
 		Player p = event.getPlayer();
 		Block b = event.getBlock();
+		
+		if (p.getGameMode() != GameMode.CREATIVE && p.getWorld() == BattleBane.lob()) {
+			event.setCancelled(true);
+			return;
+		}
 
 		for (BBTeam bbt : BBTeam.values()) {
 			if (b.getLocation().distanceSquared(bbt.spawn) <= 50 * 50) {
 				event.setCancelled(true);
+				return;
 			}
 		}
 
@@ -253,13 +287,12 @@ public class DefaultListener implements Listener {
 	public void onBlockPlace(BlockPlaceEvent event) {
 		Player p = event.getPlayer();
 		Block b = event.getBlock();
-
-		for (BBTeam bbt : BBTeam.values()) {
-			if (b.getLocation().distanceSquared(bbt.spawn) <= 50 * 50) {
-				event.setCancelled(true);
-			}
+		
+		if (p.getGameMode() != GameMode.CREATIVE && p.getWorld() == BattleBane.lob()) {
+			event.setCancelled(true);
+			return;
 		}
-
+		
 		if (BBKit.Demoman.isKit(p) && b.getType() == Material.TNT) {
 			b.setType(Material.AIR);
 			b.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, Material.TNT);
@@ -267,6 +300,15 @@ public class DefaultListener implements Listener {
 			TNTPrimed tnt = (TNTPrimed) b.getWorld().spawnEntity(b.getLocation().add(0.5, 0.5, 0.5),
 					EntityType.PRIMED_TNT);
 			tnt.setFuseTicks(40);
+			demo.put(tnt, p.getName());
+			return;
+		}
+
+		for (BBTeam bbt : BBTeam.values()) {
+			if (b.getLocation().distanceSquared(bbt.spawn) <= 50 * 50) {
+				event.setCancelled(true);
+			}
+			return;
 		}
 	}
 

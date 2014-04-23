@@ -3,6 +3,7 @@ package net.mcshockwave.bbane;
 import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
@@ -27,6 +28,12 @@ public enum Arena {
 		}
 
 		name = name().replace('_', ' ');
+	}
+	
+	public void teleport(Player p, BBTeam bbt) {
+		Location tp = spawns.get(bbt);
+		tp.setWorld(BattleBane.are());
+		p.teleport(tp);
 	}
 
 	private static Vector v(double x, double y, double z) {

@@ -122,9 +122,21 @@ public class Bane implements CommandExecutor {
 				if (c.equalsIgnoreCase("reloadArena")) {
 					BattleBane.resetArena();
 				}
+				
+				if (c.equalsIgnoreCase("restart")) {
+					restart();
+				}
 			}
 		}
 
 		return false;
+	}
+	
+	public static void restart() {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			p.kickPlayer("§e§lServer Restarting");
+		}
+		BattleBane.deleteWorld(BattleBane.wor());
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
 	}
 }

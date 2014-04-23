@@ -4,6 +4,7 @@ import net.mcshockwave.MCS.MCShockwave;
 import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
 import net.mcshockwave.bbane.commands.Bane;
+import net.mcshockwave.bbane.commands.Surface;
 import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
@@ -49,6 +50,7 @@ public class BattleBane extends JavaPlugin {
 		score = Bukkit.getScoreboardManager().getMainScoreboard();
 
 		getCommand("bane").setExecutor(new Bane());
+		getCommand("surface").setExecutor(new Surface());
 
 		new WorldCreator("BattleBaneLobby").type(WorldType.FLAT).createWorld();
 		new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
@@ -217,7 +219,7 @@ public class BattleBane extends JavaPlugin {
 			List<Player> ready = getArenaReady(bbt);
 			if (ready.size() > 0) {
 				for (Player p : ready) {
-					p.teleport(ar.spawns.get(bbt));
+					ar.teleport(p, bbt);
 				}
 			}
 		}
