@@ -292,10 +292,17 @@ public class DefaultListener implements Listener {
 			return;
 		}
 
-		if (BBKit.Demoman.isKit(p) && b.getType() == Material.TNT
-				&& event.getBlockReplacedState().getBlock().getType() == Material.AIR) {
-			b.setType(Material.AIR);
+		if (BBKit.Demoman.isKit(p) && p.getItemInHand().getType() == Material.TNT) {
+			event.setBuild(false);
 			b.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, Material.TNT);
+			
+			ItemStack it = p.getItemInHand();
+			if (it.getAmount() > 1) {
+				it.setAmount(it.getAmount() - 1);
+			} else {
+				it.setType(Material.AIR);
+			}
+			p.setItemInHand(it);
 
 			TNTPrimed tnt = (TNTPrimed) b.getWorld().spawnEntity(b.getLocation().add(0.5, 0.5, 0.5),
 					EntityType.PRIMED_TNT);
