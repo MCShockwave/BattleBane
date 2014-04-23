@@ -9,6 +9,7 @@ import net.mcshockwave.bbane.commands.Surface;
 import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
@@ -33,6 +34,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.bukkit.BukkitUtil;
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.schematic.SchematicFormat;
+
 public class BattleBane extends JavaPlugin {
 
 	static Random				rand			= new Random();
@@ -47,6 +54,8 @@ public class BattleBane extends JavaPlugin {
 	public void onEnable() {
 		ins = this;
 		Bukkit.getPluginManager().registerEvents(new DefaultListener(), this);
+
+		saveDefaultConfig();
 
 		score = Bukkit.getScoreboardManager().getMainScoreboard();
 
@@ -171,6 +180,14 @@ public class BattleBane extends JavaPlugin {
 		c.environment(Environment.NORMAL);
 		c.createWorld();
 
+		if (wor().getSpawnLocation().getBlockX() == 0 && wor().getSpawnLocation().getBlockZ() == 0) {
+			return;
+		}
+
+		for (BBTeam bbt : BBTeam.values()) {
+			bbt.setOrigin();
+		}
+
 		wor().setSpawnLocation(0, wor().getHighestBlockYAt(0, 0) + 1, 0);
 
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
@@ -194,23 +211,27 @@ public class BattleBane extends JavaPlugin {
 		}
 
 		for (BBTeam t : BBTeam.values()) {
-			Block b = wor().getHighestBlockAt(t.x, t.z);
+			Block b = t.getSchemOrigin().getBlock();
 			b.getChunk().load();
 
-			b.setType(Material.SIGN_POST);
+			loadSchematic("bb_" + t.name().toLowerCase(), b.getLocation());
 
-			t.spawn.setY(b.getLocation().getBlockY());
-
-			try {
-				Sign s = (Sign) b.getState();
-				s.setLine(1, t.c + t.name());
-				s.update();
-			} catch (Exception e) {
-			}
+			t.getSpawn().setY(b.getLocation().getBlockY() + 8);
 		}
 	}
 
 	public static void startArena() {
+		int teams = 0;
+		for (BBTeam bbt : BBTeam.values()) {
+			if (getArenaReady(bbt).size() > 0) {
+				teams++;
+			}
+		}
+		if (teams <= 1) {
+			MCShockwave.broadcast("Not enough %s for the Arena!", "teams");
+			return;
+		}
+
 		arena = true;
 
 		Arena ar = Arena.values()[rand.nextInt(Arena.values().length)];
@@ -239,7 +260,7 @@ public class BattleBane extends JavaPlugin {
 				if (BBTeam.getTeamFor(p) != null) {
 					resetPlayer(p, true);
 					BBKit.getClassFor(p).giveKit(p);
-					p.teleport(BBTeam.getTeamFor(p).spawn);
+					p.teleport(BBTeam.getTeamFor(p).getSpawn());
 				} else {
 					p.teleport(lob().getSpawnLocation());
 				}
@@ -325,7 +346,9 @@ public class BattleBane extends JavaPlugin {
 
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			if (te.isTeam(p)) {
-				if (p.getWorld() == te.spawn.getWorld() && p.getLocation().distanceSquared(te.spawn) < 16 * 16) {
+				if (p.getWorld() == te.getSpawn().getWorld()
+						&& p.getLocation().distanceSquared(te.getThroneRoom()) < 16 * 16
+						&& p.getLocation().getY() > te.getThroneRoom().getY()) {
 					pl.add(p);
 				}
 			}
@@ -333,9 +356,9 @@ public class BattleBane extends JavaPlugin {
 
 		return pl;
 	}
-	
+
 	public static void generateCenter() {
-		
+
 	}
 
 	public static void resetPlayer(Player p) {
@@ -354,6 +377,27 @@ public class BattleBane extends JavaPlugin {
 		p.setSaturation(10f);
 		for (PotionEffect pe : p.getActivePotionEffects()) {
 			p.removePotionEffect(pe.getType());
+		}
+	}
+
+	public static void loadSchematic(String name, Location l) {
+		File f = new File(ins.getDataFolder(), name + ".schematic");
+
+		if (!f.exists()) {
+			Bukkit.broadcastMessage("§cSchematic not found: " + name + ".schematic");
+			return;
+		}
+
+		SchematicFormat schematic = SchematicFormat.getFormat(f);
+
+		EditSession session = new EditSession(new BukkitWorld(l.getWorld()), Integer.MAX_VALUE);
+		try {
+			CuboidClipboard clipboard = schematic.load(f);
+			clipboard.paste(session, BukkitUtil.toVector(l), false);
+			session.flushQueue();
+		} catch (Exception e) {
+			Bukkit.broadcastMessage("§cError while loading schem: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 

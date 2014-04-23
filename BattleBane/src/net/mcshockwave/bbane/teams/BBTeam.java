@@ -3,10 +3,13 @@ package net.mcshockwave.bbane.teams;
 import net.mcshockwave.bbane.BBKit;
 import net.mcshockwave.bbane.BattleBane;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Team;
 
 public enum BBTeam {
@@ -32,9 +35,10 @@ public enum BBTeam {
 		ChatColor.GREEN,
 		5);
 
+	public Score		yorig;
+
 	public int			x;
 	public int			z;
-	public Location		spawn;
 	public ChatColor	c;
 	public short		data;
 
@@ -47,7 +51,7 @@ public enum BBTeam {
 
 		this.data = (short) data;
 
-		this.spawn = new Location(BattleBane.wor(), x + 0.5, 64, z + 0.5);
+		setOrigin();
 
 		Team t = BattleBane.score.getTeam(name());
 		if (t != null) {
@@ -60,11 +64,36 @@ public enum BBTeam {
 		team.setAllowFriendlyFire(false);
 		team.setCanSeeFriendlyInvisibles(true);
 	}
+	
+	@SuppressWarnings("deprecation")
+	public void setOrigin() {
+		Objective ob = BattleBane.score.getObjective("Origin");
+		if (ob == null) {
+			ob = BattleBane.score.registerNewObjective("Origin", "dummy");
+		}
+		
+		yorig = ob.getScore(Bukkit.getOfflinePlayer(name()));
+		if (yorig.getScore() == 0) {
+			yorig.setScore(BattleBane.wor().getHighestBlockYAt(x, z));
+		}
+	}
+	
+	public Location getSpawn() {
+		return getSchemOrigin().add(3.5, 3, 0.5);
+	}
+	
+	public Location getSchemOrigin() {
+		return new Location(BattleBane.wor(), x, yorig.getScore(), z);
+	}
+	
+	public Location getThroneRoom() {
+		return getSchemOrigin().add(0.5, 7, 0.5);
+	}
 
 	public void addPlayer(Player p) {
 		team.addPlayer(p);
-		spawn.getChunk().load();
-		p.teleport(spawn);
+		getSpawn().getChunk().load();
+		p.teleport(getSpawn());
 
 		if (BBKit.getClassFor(p) != null) {
 			BBKit.getClassFor(p).giveKit(p);

@@ -55,14 +55,13 @@ public class DefaultListener implements Listener {
 				p.setGameMode(GameMode.SURVIVAL);
 			}
 			p.teleport(BattleBane.lob().getSpawnLocation());
-			p.getInventory().clear();
-			p.getInventory().setArmorContents(null);
+			BattleBane.resetPlayer(p, true);
 			p.getInventory().addItem(ItemMetaUtils.setItemName(new ItemStack(Material.NETHER_STAR), "Class Selector"),
 					ItemMetaUtils.setItemName(new ItemStack(Material.WOOL), "Team Selector"));
 		}
 
 		if (p.getWorld() == BattleBane.are() && BBTeam.getTeamFor(p) != null) {
-			p.teleport(BBTeam.getTeamFor(p).spawn);
+			p.teleport(BBTeam.getTeamFor(p).getSpawn());
 		}
 	}
 
@@ -115,7 +114,7 @@ public class DefaultListener implements Listener {
 
 		if (BattleBane.started) {
 			if (BBTeam.getTeamFor(p) != null) {
-				event.setRespawnLocation(BBTeam.getTeamFor(p).spawn);
+				event.setRespawnLocation(BBTeam.getTeamFor(p).getSpawn());
 			} else
 				event.setRespawnLocation(BattleBane.wor().getSpawnLocation());
 
@@ -258,7 +257,7 @@ public class DefaultListener implements Listener {
 		}
 
 		for (BBTeam bbt : BBTeam.values()) {
-			if (b.getLocation().distanceSquared(bbt.spawn) <= 50 * 50) {
+			if (b.getLocation().distanceSquared(bbt.getSpawn()) <= 50 * 50) {
 				event.setCancelled(true);
 				return;
 			}
@@ -305,7 +304,7 @@ public class DefaultListener implements Listener {
 		}
 
 		for (BBTeam bbt : BBTeam.values()) {
-			if (b.getLocation().distanceSquared(bbt.spawn) <= 50 * 50) {
+			if (b.getLocation().distanceSquared(bbt.getSpawn()) <= 50 * 50) {
 				event.setCancelled(true);
 			}
 			return;
@@ -316,7 +315,7 @@ public class DefaultListener implements Listener {
 	public void onEntityExplode(EntityExplodeEvent event) {
 		for (BBTeam bbt : BBTeam.values()) {
 			for (Block b : event.blockList().toArray(new Block[0])) {
-				if (b.getLocation().distanceSquared(bbt.spawn) <= 50 * 50) {
+				if (b.getLocation().distanceSquared(bbt.getSpawn()) <= 50 * 50) {
 					event.blockList().remove(b);
 				}
 			}
