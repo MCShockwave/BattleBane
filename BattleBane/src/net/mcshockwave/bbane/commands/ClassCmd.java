@@ -1,6 +1,7 @@
 package net.mcshockwave.bbane.commands;
 
 import net.mcshockwave.bbane.BBKit;
+import net.mcshockwave.bbane.DefaultListener;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,8 +14,10 @@ public class ClassCmd implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender instanceof Player) {
 			Player p = (Player) sender;
-			
-			BBKit.getClassMenu(p).open(p);
+
+			if (!DefaultListener.canBuildBase(p.getLocation().getBlock())) {
+				BBKit.getClassMenu(p, true).open(p);
+			}
 		}
 		return false;
 	}

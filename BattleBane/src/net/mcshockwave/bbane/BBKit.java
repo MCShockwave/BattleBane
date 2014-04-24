@@ -99,6 +99,10 @@ public enum BBKit {
 	}
 
 	public static ItemMenu getClassMenu(Player p) {
+		return getClassMenu(p, false);
+	}
+
+	public static ItemMenu getClassMenu(Player p, final boolean kill) {
 		ItemMenu cl = new ItemMenu("Classes", BBKit.values().length);
 
 		for (int i = 0; i < BBKit.values().length; i++) {
@@ -108,12 +112,15 @@ public enum BBKit {
 				public void run(Player p, InventoryClickEvent event) {
 					cs.onUse(p);
 					MCShockwave.send(ChatColor.GREEN, p, "Used class %s", cs.name);
+					if (kill) {
+						p.damage(p.getHealth());
+					}
 				}
 			});
 
 			cl.addButton(b, i);
 		}
-		
+
 		return cl;
 	}
 
