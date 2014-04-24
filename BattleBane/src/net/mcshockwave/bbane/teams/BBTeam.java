@@ -1,16 +1,25 @@
 package net.mcshockwave.bbane.teams;
 
+import net.mcshockwave.MCS.MCShockwave;
+import net.mcshockwave.MCS.Menu.ItemMenu;
+import net.mcshockwave.MCS.Menu.ItemMenu.Button;
+import net.mcshockwave.MCS.Menu.ItemMenu.ButtonRunnable;
 import net.mcshockwave.bbane.BBKit;
 import net.mcshockwave.bbane.BattleBane;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Team;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public enum BBTeam {
 
@@ -89,6 +98,18 @@ public enum BBTeam {
 	public Location getThroneRoom() {
 		return getSchemOrigin().add(0.5, 7, 0.5);
 	}
+	
+	public List<Player> getOnline() {
+		ArrayList<Player> ret = new ArrayList<>();
+		
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			if (isTeam(p)) {
+				ret.add(p);
+			}
+		}
+		
+		return ret;
+	}
 
 	public void addPlayer(Player p) {
 		team.addPlayer(p);
@@ -127,6 +148,34 @@ public enum BBTeam {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	public static ItemMenu getTeamMenu(Player p) {
+		ItemMenu cl = new ItemMenu("Team Selection", BBTeam.values().length);
+
+		for (int i = 0; i < BBTeam.values().length; i++) {
+			final BBTeam t = BBTeam.values()[i];
+			Button b = new Button(true, Material.WOOL, 1, t.data, t.c + t.name(), "", "Click to join",
+					t.team.getPlayers().size() + " players", "§a" + t.getOnline().size()
+							+ " online");
+			b.setOnClick(new ButtonRunnable() {
+				public void run(Player p, InventoryClickEvent event) {
+					int players = t.team.getPlayers().size();
+					for (BBTeam bbt : BBTeam.values()) {
+						if (players >= bbt.team.getSize() + 2) {
+							MCShockwave.send(t.c, p, "%s team is %s!", t.name(), "full");
+							return;
+						}
+					}
+					MCShockwave.send(t.c, p, "Joined team %s", t.name());
+					t.addPlayer(p);
+				}
+			});
+
+			cl.addButton(b, i);
+		}
+		
+		return cl;
 	}
 
 }

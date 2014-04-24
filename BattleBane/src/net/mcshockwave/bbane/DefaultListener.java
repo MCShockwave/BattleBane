@@ -1,20 +1,17 @@
 package net.mcshockwave.bbane;
 
-import net.mcshockwave.MCS.MCShockwave;
-import net.mcshockwave.MCS.Menu.ItemMenu;
-import net.mcshockwave.MCS.Menu.ItemMenu.Button;
-import net.mcshockwave.MCS.Menu.ItemMenu.ButtonRunnable;
 import net.mcshockwave.MCS.Utils.ItemMetaUtils;
 import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
@@ -25,12 +22,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -42,9 +40,12 @@ import java.util.Random;
 
 public class DefaultListener implements Listener {
 
-	Random								rand	= new Random();
+	Random								rand		= new Random();
 
-	public HashMap<TNTPrimed, String>	demo	= new HashMap<>();
+	public HashMap<TNTPrimed, String>	demo		= new HashMap<>();
+
+	public HashMap<Block, String>		pyro		= new HashMap<>();
+	public HashMap<String, String>		pyroIgnite	= new HashMap<>();
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
@@ -73,6 +74,11 @@ public class DefaultListener implements Listener {
 		if (ee instanceof Player) {
 			Player p = (Player) ee;
 
+			if (isInFireByTeam(p)) {
+				event.setCancelled(true);
+				p.setFireTicks(0);
+			}
+
 			if (event instanceof EntityDamageByEntityEvent) {
 				EntityDamageByEntityEvent ev = (EntityDamageByEntityEvent) event;
 				Entity de = ev.getDamager();
@@ -89,6 +95,11 @@ public class DefaultListener implements Listener {
 
 					if (!pvpEnabled(p, d)) {
 						event.setCancelled(true);
+					}
+
+					if (pyroIgnite.containsKey(p.getName())
+							&& pyroIgnite.get(p.getName()).equalsIgnoreCase(d.getName()) && p.getFireTicks() > 0) {
+						event.setDamage(event.getDamage() + 2);
 					}
 				}
 			} else {
@@ -142,6 +153,7 @@ public class DefaultListener implements Listener {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event) {
 		Player p = event.getEntity();
@@ -166,6 +178,19 @@ public class DefaultListener implements Listener {
 				}
 			}
 		}
+
+		if (pyroIgnite.containsKey(p.getName()) && p.getFireTicks() > 0) {
+			p.getWorld().createExplosion(p.getLocation(), 0f);
+			BBTeam t = BBTeam.getTeamFor(Bukkit.getOfflinePlayer(pyroIgnite.get(p.getName())));
+			for (Entity e : p.getNearbyEntities(5, 5, 5)) {
+				if (e instanceof Player && t.isTeam((Player) e)) {
+					continue;
+				}
+
+				e.setFireTicks(e.getFireTicks() + 200);
+			}
+		}
+		pyroIgnite.remove(p.getName());
 
 		if (p.getWorld() == BattleBane.are() && BattleBane.arena) {
 			event.setDeathMessage("§8[§a§lARENA§8] §f" + event.getDeathMessage());
@@ -199,49 +224,81 @@ public class DefaultListener implements Listener {
 		if (it != null && it.getType() != Material.AIR) {
 			if (a.name().contains("RIGHT_CLICK")) {
 				if (it.getType() == Material.NETHER_STAR && ItemMetaUtils.hasCustomName(it)) {
-					ItemMenu cl = new ItemMenu("Classes", BBKit.values().length);
 					event.setCancelled(true);
-
-					for (int i = 0; i < BBKit.values().length; i++) {
-						final BBKit cs = BBKit.values()[i];
-						Button b = new Button(true, cs.ico, cs.am, cs.da, cs.name, "", "Click to use");
-						b.setOnClick(new ButtonRunnable() {
-							public void run(Player p, InventoryClickEvent event) {
-								cs.onUse(p);
-								MCShockwave.send(ChatColor.GREEN, p, "Used class %s", cs.name);
-							}
-						});
-
-						cl.addButton(b, i);
-					}
-
-					cl.open(p);
+					BBKit.getClassMenu(p).open(p);
 				}
 
 				if (it.getType() == Material.WOOL && ItemMetaUtils.hasCustomName(it)) {
 					if (BBKit.getClassFor(p) != null) {
-						ItemMenu cl = new ItemMenu("Team Selection", BBTeam.values().length);
 						event.setCancelled(true);
-
-						for (int i = 0; i < BBTeam.values().length; i++) {
-							final BBTeam t = BBTeam.values()[i];
-							Button b = new Button(true, Material.WOOL, 1, t.data, t.c + t.name(), "", "Click to join",
-									t.team.getPlayers().size() + " players");
-							b.setOnClick(new ButtonRunnable() {
-								public void run(Player p, InventoryClickEvent event) {
-									MCShockwave.send(t.c, p, "Joined team %s", t.name());
-									t.addPlayer(p);
-								}
-							});
-
-							cl.addButton(b, i);
-						}
-
-						cl.open(p);
+						BBTeam.getTeamMenu(p).open(p);
 					} else {
 						p.sendMessage("§cSelect a class before choosing a team!");
 					}
 				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void onBlockIgnite(BlockPlaceEvent event) {
+		Block b = event.getBlock();
+		Player p = event.getPlayer();
+
+		if (b.getType() == Material.FIRE && BBKit.Pyro.isKit(p)) {
+			pyro.remove(b);
+			pyro.put(b, p.getName());
+
+			b.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, Material.FIRE);
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public boolean isInFireByTeam(Player p) {
+		Block bl = p.getLocation().getBlock();
+		BlockFace[] bfs = { null, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST,
+				BlockFace.NORTH_EAST, BlockFace.NORTH_WEST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_WEST };
+
+		for (int i = 0; i <= 1; i++) {
+			for (BlockFace bf : bfs) {
+				Block b;
+				if (bf != null) {
+					b = bl.getRelative(0, i, 0).getRelative(bf);
+				} else
+					b = bl.getRelative(0, i, 0);
+
+				if (b.getType() == Material.FIRE && pyro.containsKey(b)) {
+					String fire = pyro.get(b);
+
+					BBTeam t = BBTeam.getTeamFor(Bukkit.getOfflinePlayer(fire));
+					if (t != null && t.isTeam(p)) {
+						return true;
+					}
+
+					pyroIgnite.remove(p.getName());
+					pyroIgnite.put(p.getName(), fire);
+				}
+			}
+		}
+		return false;
+	}
+
+	@EventHandler
+	public void onCreatureSpawn(CreatureSpawnEvent event) {
+		if (!canBuildBase(event.getEntity().getLocation().getBlock())) {
+			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler
+	public void onEntityCombust(EntityCombustEvent event) {
+		Entity e = event.getEntity();
+		if (e instanceof Player) {
+			Player p = (Player) e;
+
+			if (isInFireByTeam(p)) {
+				event.setCancelled(true);
+				return;
 			}
 		}
 	}
@@ -256,11 +313,9 @@ public class DefaultListener implements Listener {
 			return;
 		}
 
-		for (BBTeam bbt : BBTeam.values()) {
-			if (b.getLocation().distanceSquared(bbt.getSpawn()) <= 50 * 50) {
-				event.setCancelled(true);
-				return;
-			}
+		if (!canBuildBase(b)) {
+			event.setCancelled(true);
+			return;
 		}
 
 		if (BBKit.Miner.isKit(p)) {
@@ -295,7 +350,7 @@ public class DefaultListener implements Listener {
 		if (BBKit.Demoman.isKit(p) && p.getItemInHand().getType() == Material.TNT) {
 			event.setBuild(false);
 			b.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, Material.TNT);
-			
+
 			ItemStack it = p.getItemInHand();
 			if (it.getAmount() > 1) {
 				it.setAmount(it.getAmount() - 1);
@@ -311,21 +366,17 @@ public class DefaultListener implements Listener {
 			return;
 		}
 
-		for (BBTeam bbt : BBTeam.values()) {
-			if (b.getLocation().distanceSquared(bbt.getSpawn()) <= 50 * 50) {
-				event.setCancelled(true);
-			}
+		if (!canBuildBase(b)) {
+			event.setCancelled(true);
 			return;
 		}
 	}
 
 	@EventHandler
 	public void onEntityExplode(EntityExplodeEvent event) {
-		for (BBTeam bbt : BBTeam.values()) {
-			for (Block b : event.blockList().toArray(new Block[0])) {
-				if (b.getLocation().distanceSquared(bbt.getSpawn()) <= 50 * 50) {
-					event.blockList().remove(b);
-				}
+		for (Block b : event.blockList().toArray(new Block[0])) {
+			if (!canBuildBase(b)) {
+				event.blockList().remove(b);
 			}
 		}
 	}
@@ -340,6 +391,16 @@ public class DefaultListener implements Listener {
 				return false;
 			}
 			if (p.getWorld() == BattleBane.lob() || d.getWorld() == BattleBane.lob()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean canBuildBase(Block b) {
+		Location l = b.getLocation();
+		for (BBTeam bbt : BBTeam.values()) {
+			if (Math.abs(bbt.x - l.getBlockX()) < 20 && Math.abs(bbt.z - l.getBlockZ()) < 20) {
 				return false;
 			}
 		}

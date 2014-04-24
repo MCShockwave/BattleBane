@@ -1,9 +1,15 @@
 package net.mcshockwave.bbane;
 
+import net.mcshockwave.MCS.MCShockwave;
+import net.mcshockwave.MCS.Menu.ItemMenu;
+import net.mcshockwave.MCS.Menu.ItemMenu.Button;
+import net.mcshockwave.MCS.Menu.ItemMenu.ButtonRunnable;
 import net.mcshockwave.MCS.Utils.ItemMetaUtils;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -25,7 +31,12 @@ public enum BBKit {
 		Material.TNT,
 		3,
 		0,
-		new ItemStack(Material.TNT, 3));
+		new ItemStack(Material.TNT, 3)),
+	Pyro(
+		Material.FLINT_AND_STEEL,
+		1,
+		0,
+		new ItemStack(Material.FLINT_AND_STEEL));
 
 	protected static HashMap<String, BBKit>	used	= new HashMap<>();
 
@@ -85,6 +96,25 @@ public enum BBKit {
 			return false;
 		}
 		return used.get(s) == this;
+	}
+
+	public static ItemMenu getClassMenu(Player p) {
+		ItemMenu cl = new ItemMenu("Classes", BBKit.values().length);
+
+		for (int i = 0; i < BBKit.values().length; i++) {
+			final BBKit cs = BBKit.values()[i];
+			Button b = new Button(true, cs.ico, cs.am, cs.da, cs.name, "", "Click to use");
+			b.setOnClick(new ButtonRunnable() {
+				public void run(Player p, InventoryClickEvent event) {
+					cs.onUse(p);
+					MCShockwave.send(ChatColor.GREEN, p, "Used class %s", cs.name);
+				}
+			});
+
+			cl.addButton(b, i);
+		}
+		
+		return cl;
 	}
 
 }

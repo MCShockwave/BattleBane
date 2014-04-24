@@ -5,6 +5,7 @@ import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
 import net.mcshockwave.bbane.commands.Bane;
 import net.mcshockwave.bbane.commands.BuildWorld;
+import net.mcshockwave.bbane.commands.ClassCmd;
 import net.mcshockwave.bbane.commands.Surface;
 import net.mcshockwave.bbane.teams.BBTeam;
 
@@ -58,10 +59,13 @@ public class BattleBane extends JavaPlugin {
 		saveDefaultConfig();
 
 		score = Bukkit.getScoreboardManager().getMainScoreboard();
+		
+		MCShockwave.min = Rank.OBSIDIAN;
 
 		getCommand("bane").setExecutor(new Bane());
 		getCommand("surface").setExecutor(new Surface());
 		getCommand("buildworld").setExecutor(new BuildWorld());
+		getCommand("class").setExecutor(new ClassCmd());
 
 		new WorldCreator("BattleBaneLobby").type(WorldType.FLAT).createWorld();
 		new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
@@ -369,6 +373,8 @@ public class BattleBane extends JavaPlugin {
 		if (clearInv) {
 			p.getInventory().clear();
 			p.getInventory().setArmorContents(null);
+			p.setExp(0);
+			p.setLevel(0);
 		}
 		p.setHealth(20f);
 		p.setFireTicks(0);
