@@ -27,6 +27,7 @@ import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -287,6 +288,13 @@ public class DefaultListener implements Listener {
 	public void onCreatureSpawn(CreatureSpawnEvent event) {
 		if (!canBuildBase(event.getEntity().getLocation().getBlock())) {
 			event.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void onEntityTarget(EntityTargetEvent event) {
+		if (!canBuildBase(event.getTarget().getLocation().getBlock())) {
+			event.setTarget(null);
 		}
 	}
 
