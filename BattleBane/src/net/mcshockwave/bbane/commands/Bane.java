@@ -128,7 +128,7 @@ public class Bane implements CommandExecutor {
 				}
 				
 				if (c.equalsIgnoreCase("reloadArena")) {
-					BattleBane.resetArena();
+					BattleBane.resetArena(false);
 				}
 				
 				if (c.equalsIgnoreCase("restart")) {

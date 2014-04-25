@@ -10,11 +10,16 @@ import java.util.HashMap;
 
 public enum Arena {
 
-	Arena_1(
+	Mountains(
 		v(50, 24, -73),
 		v(63, 24, 34),
 		v(-27, 24, 56),
-		v(-67, 24, -69));
+		v(-67, 24, -69)),
+	Jungle(
+		v(304, 22, 87),
+		v(314, 23, -9),
+		v(233, 26, -18),
+		v(240, 22, 70));
 
 	// 0 = Red, 1 = Blue, 2 = Yellow, 3 = Green
 
@@ -29,7 +34,7 @@ public enum Arena {
 
 		name = name().replace('_', ' ');
 	}
-	
+
 	public void teleport(Player p, BBTeam bbt) {
 		Location tp = spawns.get(bbt);
 		tp.setWorld(BattleBane.are());

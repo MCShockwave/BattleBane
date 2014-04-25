@@ -57,6 +57,8 @@ public class BattleBane extends JavaPlugin {
 	public static boolean		started			= true, arena = false;
 	public static Arena			currentArena	= null;
 
+	public static final int		pointsNeeded	= 10;
+
 	public void onEnable() {
 		score = Bukkit.getScoreboardManager().getMainScoreboard();
 
@@ -267,7 +269,7 @@ public class BattleBane extends JavaPlugin {
 				}
 			}, i * 20));
 		}
-		
+
 		arenaTasks.add(Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
 				startArena();
@@ -313,7 +315,7 @@ public class BattleBane extends JavaPlugin {
 		MCShockwave.broadcast("Arena started on %s", ar.name);
 	}
 
-	public static void endArena(BBTeam winner) {
+	public static void endArena(final BBTeam winner) {
 		arena = false;
 
 		for (Entity e : are().getEntities()) {
@@ -333,20 +335,32 @@ public class BattleBane extends JavaPlugin {
 		if (winner != null) {
 			MCShockwave.broadcast(winner.c, "%s has won on arena %s", winner.name(), currentArena.name);
 			winner.points.setScore(winner.points.getScore() + 1);
+			if (winner.points.getScore() >= pointsNeeded) {
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage(winner.c + "§l" + winner.name().toUpperCase() + " TEAM WINS THE GAME!");
+				Bukkit.broadcastMessage(winner.c + "§lServer restarting soon!");
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage("");
+				Bukkit.broadcastMessage("");
+			}
 		} else {
 			MCShockwave.broadcast("%s has won on arena %s", "Nobody", currentArena.name);
 		}
 
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
-				resetArena();
+				resetArena(winner.points.getScore() >= pointsNeeded);
 			}
 		}, 100l);
 
 		currentArena = null;
 	}
 
-	public static void resetArena() {
+	public static void resetArena(final boolean win) {
 		System.out.println("Deleting arena file...");
 		deleteWorld(are());
 
@@ -372,10 +386,14 @@ public class BattleBane extends JavaPlugin {
 
 				if (are().getBlockAt(0, 0, 0).getType() != Material.AIR) {
 					sendToMods("§cError resetting arena map... trying again");
-					resetArena();
+					resetArena(win);
 					return;
 				} else {
 					sendToMods("§aArena successfully generated");
+				}
+
+				if (win) {
+					Bane.restart();
 				}
 
 				System.out.println("Done resetting world!");
