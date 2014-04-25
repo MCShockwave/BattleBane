@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Team;
@@ -51,9 +52,12 @@ public enum BBTeam {
 	public ChatColor	c;
 	public short		data;
 
+	public Score		points;
+
 	public Team			team;
 
-	private BBTeam(int x, int z, ChatColor c, int data) {
+	@SuppressWarnings("deprecation")
+	private BBTeam(int x, int z, ChatColor c, int data) {		
 		this.x = x;
 		this.z = z;
 		this.c = c;
@@ -67,47 +71,58 @@ public enum BBTeam {
 			t.unregister();
 		}
 
+		Objective ob = BattleBane.score.getObjective("Points");
+		if (ob == null) {
+			ob = BattleBane.score.registerNewObjective("Points", "dummy");
+		}
+		ob.setDisplayName("§6Battle Bane §7Points");
+		ob.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+		points = ob.getScore(Bukkit.getOfflinePlayer(c + name()));
+		points.setScore(1);
+		points.setScore(0);
+
 		team = BattleBane.score.registerNewTeam(name());
 		team.setPrefix(c.toString());
 		team.setSuffix("§r");
 		team.setAllowFriendlyFire(false);
 		team.setCanSeeFriendlyInvisibles(true);
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public void setOrigin() {
 		Objective ob = BattleBane.score.getObjective("Origin");
 		if (ob == null) {
 			ob = BattleBane.score.registerNewObjective("Origin", "dummy");
 		}
-		
+
 		yorig = ob.getScore(Bukkit.getOfflinePlayer(name()));
 		if (yorig.getScore() == 0) {
 			yorig.setScore(BattleBane.wor().getHighestBlockYAt(x, z));
 		}
 	}
-	
+
 	public Location getSpawn() {
 		return getSchemOrigin().add(3.5, 3, 0.5);
 	}
-	
+
 	public Location getSchemOrigin() {
 		return new Location(BattleBane.wor(), x, yorig.getScore(), z);
 	}
-	
+
 	public Location getThroneRoom() {
 		return getSchemOrigin().add(0.5, 7, 0.5);
 	}
-	
+
 	public List<Player> getOnline() {
 		ArrayList<Player> ret = new ArrayList<>();
-		
+
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			if (isTeam(p)) {
 				ret.add(p);
 			}
 		}
-		
+
 		return ret;
 	}
 
@@ -155,9 +170,8 @@ public enum BBTeam {
 
 		for (int i = 0; i < BBTeam.values().length; i++) {
 			final BBTeam t = BBTeam.values()[i];
-			Button b = new Button(true, Material.WOOL, 1, t.data, t.c + t.name(), "", "Click to join",
-					t.team.getPlayers().size() + " players", "§a" + t.getOnline().size()
-							+ " online");
+			Button b = new Button(true, Material.WOOL, 1, t.data, t.c + t.name(), "", "Click to join", t.team
+					.getPlayers().size() + " players", "§a" + t.getOnline().size() + " online");
 			b.setOnClick(new ButtonRunnable() {
 				public void run(Player p, InventoryClickEvent event) {
 					int players = t.team.getPlayers().size();
@@ -174,7 +188,7 @@ public enum BBTeam {
 
 			cl.addButton(b, i);
 		}
-		
+
 		return cl;
 	}
 

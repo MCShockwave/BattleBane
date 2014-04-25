@@ -290,7 +290,7 @@ public class DefaultListener implements Listener {
 			event.setCancelled(true);
 		}
 	}
-	
+
 	@EventHandler
 	public void onEntityTarget(EntityTargetEvent event) {
 		if (!canBuildBase(event.getTarget().getLocation().getBlock())) {
@@ -321,7 +321,7 @@ public class DefaultListener implements Listener {
 			return;
 		}
 
-		if (!canBuildBase(b)) {
+		if (!canBuildBase(b) || !canBuildCenter(b)) {
 			event.setCancelled(true);
 			return;
 		}
@@ -374,7 +374,7 @@ public class DefaultListener implements Listener {
 			return;
 		}
 
-		if (!canBuildBase(b)) {
+		if (!canBuildBase(b) || !canBuildCenter(b)) {
 			event.setCancelled(true);
 			return;
 		}
@@ -383,7 +383,7 @@ public class DefaultListener implements Listener {
 	@EventHandler
 	public void onEntityExplode(EntityExplodeEvent event) {
 		for (Block b : event.blockList().toArray(new Block[0])) {
-			if (!canBuildBase(b)) {
+			if (!canBuildBase(b) || !canBuildCenter(b)) {
 				event.blockList().remove(b);
 			}
 		}
@@ -407,10 +407,24 @@ public class DefaultListener implements Listener {
 
 	public static boolean canBuildBase(Block b) {
 		Location l = b.getLocation();
+		if (BattleBane.wor() != l.getWorld()) {
+			return true;
+		}
 		for (BBTeam bbt : BBTeam.values()) {
 			if (Math.abs(bbt.x - l.getBlockX()) < 20 && Math.abs(bbt.z - l.getBlockZ()) < 20) {
 				return false;
 			}
+		}
+		return true;
+	}
+
+	public static boolean canBuildCenter(Block b) {
+		Location l = b.getLocation();
+		if (BattleBane.wor() != l.getWorld()) {
+			return true;
+		}
+		if (Math.abs(l.getBlockX()) < 25 && Math.abs(l.getBlockZ()) < 25) {
+			return false;
 		}
 		return true;
 	}

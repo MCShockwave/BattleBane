@@ -94,6 +94,14 @@ public class Bane implements CommandExecutor {
 						}
 					}
 				}
+				
+				if (c.equalsIgnoreCase("timearena")) {
+					BattleBane.startArenaCount(Integer.parseInt(args[1]));
+				}
+				
+				if (c.equalsIgnoreCase("arenastopcount")) {
+					BattleBane.stopArenaCount();
+				}
 
 				if (c.equalsIgnoreCase("startarena")) {
 					BattleBane.startArena();
