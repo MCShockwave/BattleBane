@@ -12,9 +12,13 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Giant;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
@@ -26,15 +30,20 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -154,7 +163,39 @@ public class DefaultListener implements Listener {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+	@EventHandler
+	public void onEntityDeath(final EntityDeathEvent event) {
+		final LivingEntity e = event.getEntity();
+
+		if (e instanceof Giant) {
+			ItemStack sword = new ItemStack(Material.DIAMOND_SWORD, 1, (short) 1561);
+			sword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 50);
+			event.getDrops().add(sword);
+			for (int i = 0; i < rand.nextInt(8) + 4; i++) {
+				event.getDrops().add(new ItemStack(Material.DIAMOND));
+			}
+			for (int i = 0; i < rand.nextInt(12) + 6; i++) {
+				event.getDrops().add(new ItemStack(Material.IRON_INGOT));
+			}
+			event.setDroppedExp(rand.nextInt(200) + 100);
+
+			e.getWorld().createExplosion(e.getLocation(), 2f);
+			int i = 0;
+			for (ItemStack item : event.getDrops()) {
+				i++;
+				final ItemStack it = item;
+				Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
+					public void run() {
+						Item i = e.getLocation().getWorld().dropItem(e.getLocation(), it);
+						double rad = 0.4;
+						i.setVelocity(new Vector(rand.nextGaussian() * rad, 0.2, rand.nextGaussian() * rad));
+					}
+				}, i * 3);
+			}
+			event.getDrops().clear();
+		}
+	}
+
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event) {
 		Player p = event.getEntity();
@@ -167,30 +208,6 @@ public class DefaultListener implements Listener {
 			}
 		}
 
-		if (BBKit.Demoman.isKit(p) && p.getWorld() != BattleBane.are()) {
-			TNTPrimed tnt = (TNTPrimed) p.getWorld().spawnEntity(p.getLocation().add(0.5, 1.5, 0.5),
-					EntityType.PRIMED_TNT);
-			tnt.setFuseTicks(300);
-			demo.put(tnt, p.getName());
-
-			for (Player p2 : Bukkit.getOnlinePlayers()) {
-				if (p2.getWorld() == p.getWorld() && p2.getLocation().distanceSquared(p.getLocation()) < 16 * 16) {
-					p2.sendMessage("You have 15 seconds to loot the body of " + p.getName());
-				}
-			}
-		}
-
-		if (pyroIgnite.containsKey(p.getName()) && p.getFireTicks() > 0) {
-			p.getWorld().createExplosion(p.getLocation(), 0f);
-			BBTeam t = BBTeam.getTeamFor(Bukkit.getOfflinePlayer(pyroIgnite.get(p.getName())));
-			for (Entity e : p.getNearbyEntities(5, 5, 5)) {
-				if (e instanceof Player && t.isTeam((Player) e)) {
-					continue;
-				}
-
-				e.setFireTicks(e.getFireTicks() + 200);
-			}
-		}
 		pyroIgnite.remove(p.getName());
 
 		if (p.getWorld() == BattleBane.are() && BattleBane.arena) {
@@ -198,6 +215,10 @@ public class DefaultListener implements Listener {
 
 			PlayerRespawnEvent ev = new PlayerRespawnEvent(p, BattleBane.lob().getSpawnLocation(), false);
 			Bukkit.getPluginManager().callEvent(ev);
+			for (ItemStack it : event.getDrops()) {
+				p.getWorld().dropItemNaturally(p.getEyeLocation(), it);
+			}
+			event.getDrops().clear();
 			BattleBane.resetPlayer(p, true);
 			p.teleport(ev.getRespawnLocation());
 
@@ -389,6 +410,18 @@ public class DefaultListener implements Listener {
 		}
 	}
 
+	@EventHandler
+	public void onInventoryClick(InventoryClickEvent event) {
+		ItemStack cu = event.getCurrentItem();
+		Inventory i = event.getInventory();
+
+		if (i.getType() == InventoryType.CHEST) {
+			if (ItemMetaUtils.hasLore(cu) && ItemMetaUtils.getLoreArray(cu)[0].equalsIgnoreCase("񘿾Kit Item")) {
+				event.setCancelled(true);
+			}
+		}
+	}
+
 	public static boolean pvpEnabled(Player p, Player d) {
 		if (d == null) {
 			if (p.getWorld() == BattleBane.lob()) {
@@ -411,7 +444,8 @@ public class DefaultListener implements Listener {
 			return true;
 		}
 		for (BBTeam bbt : BBTeam.values()) {
-			if (Math.abs(bbt.x - l.getBlockX()) < 20 && Math.abs(bbt.z - l.getBlockZ()) < 20) {
+			if (Math.abs(bbt.x - l.getBlockX()) < 20 && Math.abs(bbt.z - l.getBlockZ()) < 20
+					&& l.getBlockY() > bbt.yorig.getScore() - 30) {
 				return false;
 			}
 		}

@@ -59,6 +59,9 @@ public class BattleBane extends JavaPlugin {
 
 	public static final int		pointsNeeded	= 10;
 
+	public static int			centerOrigin	= 64;
+
+	@SuppressWarnings("deprecation")
 	public void onEnable() {
 		score = Bukkit.getScoreboardManager().getMainScoreboard();
 
@@ -75,6 +78,9 @@ public class BattleBane extends JavaPlugin {
 		}
 
 		MCShockwave.min = Rank.OBSIDIAN;
+		
+		Score max = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§c  -- NEEDED --"));
+		max.setScore(pointsNeeded);
 
 		getCommand("bane").setExecutor(new Bane());
 		getCommand("surface").setExecutor(new Surface());
@@ -220,14 +226,13 @@ public class BattleBane extends JavaPlugin {
 		cen.getChunk().load();
 
 		loadSchematic("bb_center", cen.getLocation());
+		centerOrigin = cen.getLocation().getBlockY();
 
 		for (BBTeam t : BBTeam.values()) {
 			Block b = t.getSchemOrigin().getBlock();
 			b.getChunk().load();
 
 			loadSchematic("bb_" + t.name().toLowerCase(), b.getLocation());
-
-			t.getSpawn().setY(b.getLocation().getBlockY() + 8);
 		}
 	}
 
@@ -440,7 +445,9 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void generateCenter() {
-
+		CenterEvent ce = CenterEvent.values()[rand.nextInt(CenterEvent.values().length)];
+		ce.onStart();
+		MCShockwave.broadcast(ChatColor.DARK_AQUA, "The center has spawned %s!", ce.name);
 	}
 
 	public static void resetPlayer(Player p) {

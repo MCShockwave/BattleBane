@@ -134,6 +134,10 @@ public class Bane implements CommandExecutor {
 				if (c.equalsIgnoreCase("restart")) {
 					restart();
 				}
+				
+				if (c.equalsIgnoreCase("center")) {
+					BattleBane.generateCenter();
+				}
 			}
 		}
 
