@@ -1,6 +1,9 @@
 package net.mcshockwave.bbane;
 
 import net.mcshockwave.MCS.Utils.ItemMetaUtils;
+import net.mcshockwave.MCS.Utils.PacketUtils;
+import net.mcshockwave.MCS.Utils.PacketUtils.ParticleEffect;
+import net.mcshockwave.bbane.kits.ArcherSettings;
 import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
@@ -32,6 +35,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -40,19 +44,22 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class DefaultListener implements Listener {
 
 	Random								rand		= new Random();
 
-	public HashMap<TNTPrimed, String>	demo		= new HashMap<>();
+	public static HashMap<TNTPrimed, String>	demo		= new HashMap<>();
 
 	public HashMap<Block, String>		pyro		= new HashMap<>();
 	public HashMap<String, String>		pyroIgnite	= new HashMap<>();
@@ -67,8 +74,9 @@ public class DefaultListener implements Listener {
 			}
 			p.teleport(BattleBane.lob().getSpawnLocation());
 			BattleBane.resetPlayer(p, true);
-			p.getInventory().addItem(ItemMetaUtils.setItemName(new ItemStack(Material.NETHER_STAR), "Class Selector"),
-					ItemMetaUtils.setItemName(new ItemStack(Material.WOOL), "Team Selector"));
+			p.getInventory().addItem(
+					ItemMetaUtils.setItemName(new ItemStack(Material.NETHER_STAR), "Class Selector"),
+					ItemMetaUtils.setItemName(new ItemStack(Material.WOOL), "Team Selector"));
 		}
 
 		if (p.getWorld() == BattleBane.are() && BBTeam.getTeamFor(p) != null) {
@@ -167,6 +175,34 @@ public class DefaultListener implements Listener {
 	public void onEntityDeath(final EntityDeathEvent event) {
 		final LivingEntity e = event.getEntity();
 
+		if (e.getKiller() != null && BBKit.Medic.isKit(e.getKiller())) {
+			Player k = e.getKiller();
+
+			List<Player> nearby = new ArrayList<Player>();
+			nearby.add(k);
+			for (Entity en : k.getNearbyEntities(8, 8, 8)) {
+				if (en instanceof Player) {
+					Player n = (Player) en;
+
+					if (BBTeam.getTeamFor(n) == BBTeam.getTeamFor(k)) {
+						nearby.add(n);
+					}
+				}
+			}
+
+			double hp = 10 / nearby.size();
+			for (Player n : nearby) {
+				double hea = n.getHealth();
+				hea += hp;
+				if (hea > n.getMaxHealth()) {
+					hea = n.getMaxHealth();
+				}
+				n.setHealth(hea);
+
+				PacketUtils.playParticleEffect(ParticleEffect.HEART, n.getEyeLocation(), 1, 1, 10);
+			}
+		}
+
 		if (e instanceof Giant) {
 			ItemStack sword = new ItemStack(Material.DIAMOND_SWORD, 1, (short) 1561);
 			sword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 50);
@@ -174,12 +210,12 @@ public class DefaultListener implements Listener {
 			for (int i = 0; i < rand.nextInt(8) + 4; i++) {
 				event.getDrops().add(new ItemStack(Material.DIAMOND));
 			}
-			for (int i = 0; i < rand.nextInt(12) + 6; i++) {
+			for (int i = 0; i < rand.nextInt(18) + 10; i++) {
 				event.getDrops().add(new ItemStack(Material.IRON_INGOT));
 			}
 			event.setDroppedExp(rand.nextInt(200) + 100);
 
-			e.getWorld().createExplosion(e.getLocation(), 2f);
+			e.getWorld().createExplosion(e.getLocation(), 8f);
 			int i = 0;
 			for (ItemStack item : event.getDrops()) {
 				i++;
@@ -202,9 +238,40 @@ public class DefaultListener implements Listener {
 
 		for (ItemStack it : event.getDrops().toArray(new ItemStack[0])) {
 			if (it != null && it.getType() != Material.AIR) {
+				if (it.getType() == Material.ARROW && BBKit.Archer.isKit(p)) {
+					event.getDrops().remove(it);
+				}
 				if (ItemMetaUtils.hasLore(it) && ItemMetaUtils.getLoreArray(it)[0].equalsIgnoreCase("񘿾Kit Item")) {
 					event.getDrops().remove(it);
 				}
+			}
+		}
+
+		if (p.getKiller() != null && BBKit.Medic.isKit(p.getKiller())) {
+			Player k = p.getKiller();
+
+			List<Player> nearby = new ArrayList<Player>();
+			nearby.add(k);
+			for (Entity e : k.getNearbyEntities(8, 8, 8)) {
+				if (e instanceof Player) {
+					Player n = (Player) e;
+
+					if (BBTeam.getTeamFor(n) == BBTeam.getTeamFor(k)) {
+						nearby.add(n);
+					}
+				}
+			}
+
+			double hp = 20 / nearby.size();
+			for (Player n : nearby) {
+				double hea = n.getHealth();
+				hea += hp;
+				if (hea > n.getMaxHealth()) {
+					hea = n.getMaxHealth();
+				}
+				n.setHealth(hea);
+
+				PacketUtils.playParticleEffect(ParticleEffect.HEART, n.getEyeLocation(), 1, 1, 10);
 			}
 		}
 
@@ -258,6 +325,24 @@ public class DefaultListener implements Listener {
 						p.sendMessage("Select a class before choosing a team!");
 					}
 				}
+			}
+			if (a.name().contains("LEFT_CLICK")) {
+				if (it.getType() == Material.BOW && ArcherSettings.isBow(it)) {
+					ArcherSettings.getMenu().open(p);
+				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void onEntityShootBow(EntityShootBowEvent event) {
+		Entity ee = event.getEntity();
+
+		if (ee instanceof Player) {
+			Player p = (Player) ee;
+
+			if (ArcherSettings.isBow(event.getBow())) {
+				ArcherSettings.getSetting(event.getBow()).onShoot(p, event);
 			}
 		}
 	}
@@ -332,13 +417,27 @@ public class DefaultListener implements Listener {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event) {
 		Player p = event.getPlayer();
-		Block b = event.getBlock();
+		final Block b = event.getBlock();
 
 		if (p.getGameMode() != GameMode.CREATIVE && p.getWorld() == BattleBane.lob()) {
 			event.setCancelled(true);
+			return;
+		}
+
+		if (!canBuildBase(b) && (b.getType() == Material.MELON_BLOCK || b.getType() == Material.LOG)) {
+			event.setCancelled(false);
+			final Material mat = b.getType();
+			final byte dura = b.getData();
+			Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
+				public void run() {
+					b.setType(mat);
+					b.setData(dura);
+				}
+			}, 200);
 			return;
 		}
 
@@ -404,7 +503,7 @@ public class DefaultListener implements Listener {
 	@EventHandler
 	public void onEntityExplode(EntityExplodeEvent event) {
 		for (Block b : event.blockList().toArray(new Block[0])) {
-			if (!canBuildBase(b) || !canBuildCenter(b)) {
+			if (!canBuildBase(b) || !canBuildCenter(b, true)) {
 				event.blockList().remove(b);
 			}
 		}
@@ -419,6 +518,18 @@ public class DefaultListener implements Listener {
 			if (ItemMetaUtils.hasLore(cu) && ItemMetaUtils.getLoreArray(cu)[0].equalsIgnoreCase("񘿾Kit Item")) {
 				event.setCancelled(true);
 			}
+		}
+	}
+
+	@EventHandler
+	public void onPlayerMove(PlayerMoveEvent event) {
+		Player p = event.getPlayer();
+		Location to = event.getTo();
+
+		if (to.getWorld() == BattleBane.lob() && to.getY() < 55 && p.getGameMode() != GameMode.CREATIVE) {
+			BattleBane.resetPlayer(p, true);
+			p.teleport(BattleBane.lob().getSpawnLocation());
+			BBKit.giveSelectors(p);
 		}
 	}
 
@@ -453,11 +564,18 @@ public class DefaultListener implements Listener {
 	}
 
 	public static boolean canBuildCenter(Block b) {
+		return canBuildCenter(b, false);
+	}
+
+	public static boolean canBuildCenter(Block b, boolean includeCenter) {
 		Location l = b.getLocation();
 		if (BattleBane.wor() != l.getWorld()) {
 			return true;
 		}
-		if (Math.abs(l.getBlockX()) < 25 && Math.abs(l.getBlockZ()) < 25) {
+		if (Math.abs(l.getBlockX()) < 25
+				&& Math.abs(l.getBlockZ()) < 25
+				&& !(!includeCenter && l.getBlockY() > BattleBane.centerOrigin - 1 && Math.abs(l.getBlockX()) <= 5 && Math
+						.abs(l.getBlockZ()) <= 5)) {
 			return false;
 		}
 		return true;

@@ -5,6 +5,7 @@ import net.mcshockwave.MCS.Menu.ItemMenu;
 import net.mcshockwave.MCS.Menu.ItemMenu.Button;
 import net.mcshockwave.MCS.Menu.ItemMenu.ButtonRunnable;
 import net.mcshockwave.MCS.Utils.ItemMetaUtils;
+import net.mcshockwave.bbane.kits.ArcherSettings;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -36,7 +37,17 @@ public enum BBKit {
 		Material.FLINT_AND_STEEL,
 		1,
 		0,
-		new ItemStack(Material.FLINT_AND_STEEL));
+		new ItemStack(Material.FLINT_AND_STEEL)),
+	Medic(
+		Material.GOLDEN_APPLE,
+		1,
+		0),
+	Archer(
+		Material.BOW,
+		1,
+		0,
+		new ItemStack(Material.BOW),
+		new ItemStack(Material.ARROW, 15));
 
 	protected static HashMap<String, BBKit>	used	= new HashMap<>();
 
@@ -69,6 +80,13 @@ public enum BBKit {
 		return null;
 	}
 
+	public static void giveSelectors(Player p) {
+		p.getInventory().clear();
+		p.getInventory().setArmorContents(null);
+		p.getInventory().addItem(ItemMetaUtils.setItemName(new ItemStack(Material.NETHER_STAR), "§rClass Selector"),
+				ItemMetaUtils.setItemName(new ItemStack(Material.WOOL), "§rTeam Selector"));
+	}
+
 	public void onUse(Player p) {
 		used.remove(p.getName());
 		used.put(p.getName(), this);
@@ -78,9 +96,17 @@ public enum BBKit {
 		p.getInventory().clear();
 		p.getInventory().setArmorContents(null);
 		for (ItemStack it : kit) {
+			if (it.getType() == Material.ARROW) {
+				p.getInventory().addItem(it);
+				continue;
+			}
 			p.getInventory().addItem(ItemMetaUtils.setLore(it, "§6Kit Item"));
 		}
 		p.getInventory().addItem(ItemMetaUtils.setLore(new ItemStack(Material.COOKED_BEEF, 8), "§6Kit Item"));
+
+		if (this == Archer) {
+			p.getInventory().setItem(0, ArcherSettings.Single_Shot.setItemTo(p.getInventory().getItem(0)));
+		}
 
 		if (this == Civilian) {
 			p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0));

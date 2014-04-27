@@ -3,7 +3,6 @@ package net.mcshockwave.bbane;
 import net.mcshockwave.MCS.MCShockwave;
 import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
-import net.mcshockwave.MCS.Utils.ItemMetaUtils;
 import net.mcshockwave.bbane.commands.Bane;
 import net.mcshockwave.bbane.commands.BuildWorld;
 import net.mcshockwave.bbane.commands.ClassCmd;
@@ -22,7 +21,6 @@ import org.bukkit.WorldType;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -57,9 +55,11 @@ public class BattleBane extends JavaPlugin {
 	public static boolean		started			= true, arena = false;
 	public static Arena			currentArena	= null;
 
-	public static final int		pointsNeeded	= 10;
+	public static int		pointsNeeded	= 5;
 
 	public static int			centerOrigin	= 64;
+
+	public static Score			time;
 
 	@SuppressWarnings("deprecation")
 	public void onEnable() {
@@ -68,18 +68,25 @@ public class BattleBane extends JavaPlugin {
 		ins = this;
 		Bukkit.getPluginManager().registerEvents(new DefaultListener(), this);
 
+		score.resetScores(Bukkit.getOfflinePlayer("§dTime:"));
+		time = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§dTime:"));
+
 		saveDefaultConfig();
 
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			resetPlayer(p, true);
 			p.teleport(lob().getSpawnLocation());
-			p.getInventory().addItem(ItemMetaUtils.setItemName(new ItemStack(Material.NETHER_STAR), "Class Selector"),
-					ItemMetaUtils.setItemName(new ItemStack(Material.WOOL), "Team Selector"));
+			BBKit.giveSelectors(p);
 		}
 
 		MCShockwave.min = Rank.OBSIDIAN;
-		
-		Score max = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§c  -- NEEDED --"));
+
+		for (BBTeam bbt : BBTeam.values()) {
+			bbt.setOrigin();
+			bbt.points.setScore(0);
+		}
+
+		Score max = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§7 Points Needed"));
 		max.setScore(pointsNeeded);
 
 		getCommand("bane").setExecutor(new Bane());
@@ -91,6 +98,8 @@ public class BattleBane extends JavaPlugin {
 		new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
 		new WorldCreator("BattleBaneArenaBuild").type(WorldType.FLAT).createWorld();
 		genWorld();
+
+		centerOrigin = wor().getHighestBlockYAt(0, 0);
 	}
 
 	public void onDisable() {
@@ -238,10 +247,7 @@ public class BattleBane extends JavaPlugin {
 
 	public static ArrayList<BukkitTask>	arenaTasks	= new ArrayList<>();
 
-	@SuppressWarnings("deprecation")
 	public static void startArenaCount(final int startTime) {
-		final Score time = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§dTime:"));
-
 		final int[] timeBroad = { 300, 180, 120, 60, 45, 30, 15, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
 
 		for (int i : timeBroad) {

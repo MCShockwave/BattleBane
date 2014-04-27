@@ -44,7 +44,7 @@ public enum CenterEvent {
 		BattleBane.loadSchematic(getSchematic(), center);
 
 		for (Entity e : BattleBane.wor().getEntities()) {
-			if (!DefaultListener.canBuildCenter(e.getLocation().getBlock()) && !(e instanceof Player)) {
+			if (!DefaultListener.canBuildCenter(e.getLocation().getBlock(), true) && !(e instanceof Player)) {
 				e.remove();
 			}
 		}
@@ -54,19 +54,19 @@ public enum CenterEvent {
 		Random rand = new Random();
 		if (this == bb_center0) {
 			for (int i = 0; i < rand.nextInt(5) + 8; i++) {
-				Location r = LocUtils.addRand(center.clone(), 10, 0, 10);
+				Location r = LocUtils.addRand(center.clone(), 5, 0, 5);
 				r.getWorld().spawnEntity(r, EntityType.CHICKEN);
 			}
 		}
 		if (this == bb_center1) {
 			for (int i = 0; i < rand.nextInt(5) + 8; i++) {
-				Location r = LocUtils.addRand(center.clone(), 10, 0, 10);
+				Location r = LocUtils.addRand(center.clone(), 5, 0, 5);
 				r.getWorld().spawnEntity(r, EntityType.COW);
 			}
 		}
 		if (this == bb_center2) {
 			for (int i = 0; i < rand.nextInt(5) + 8; i++) {
-				Location r = LocUtils.addRand(center.clone(), 10, 0, 10);
+				Location r = LocUtils.addRand(center.clone(), 5, 0, 5);
 				Spider s = (Spider) r.getWorld().spawnEntity(r, EntityType.SPIDER);
 				s.setRemoveWhenFarAway(false);
 			}
@@ -77,6 +77,7 @@ public enum CenterEvent {
 			g.setHealth(g.getMaxHealth());
 			g.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 1));
 			g.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1));
+			g.setRemoveWhenFarAway(false);
 		}
 	}
 

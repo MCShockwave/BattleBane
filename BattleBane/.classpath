@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="C:/Eclipse Exports/MCShockwave.jar"/>
 	<classpathentry kind="lib" path="C:/WorldEdit.jar"/>
 	<classpathentry kind="lib" path="C:/spigot-api-1.7.5-R0.1-20140403.201412-29.jar"/>
+	<classpathentry kind="lib" path="C:/spigot-1.7.5-R0.1-20140403.201507-29.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

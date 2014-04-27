@@ -2,13 +2,12 @@ package net.mcshockwave.bbane.commands;
 
 import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
-import net.mcshockwave.MCS.Utils.ItemMetaUtils;
+import net.mcshockwave.bbane.BBKit;
 import net.mcshockwave.bbane.BattleBane;
 import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
@@ -16,7 +15,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.Score;
 
 import java.util.Arrays;
 
@@ -24,6 +23,7 @@ import org.apache.commons.lang.WordUtils;
 
 public class Bane implements CommandExecutor {
 
+	@SuppressWarnings("deprecation")
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
 		if (sender instanceof Player) {
@@ -86,19 +86,15 @@ public class Bane implements CommandExecutor {
 				if (c.equalsIgnoreCase("giveselectors")) {
 					for (Player p2 : Bukkit.getOnlinePlayers()) {
 						if (BBTeam.getTeamFor(p2) == null) {
-							p2.getInventory().clear();
-							p2.getInventory().setArmorContents(null);
-							p2.getInventory().addItem(
-									ItemMetaUtils.setItemName(new ItemStack(Material.NETHER_STAR), "Class Selector"),
-									ItemMetaUtils.setItemName(new ItemStack(Material.WOOL), "Team Selector"));
+							BBKit.giveSelectors(p2);
 						}
 					}
 				}
-				
+
 				if (c.equalsIgnoreCase("timearena")) {
 					BattleBane.startArenaCount(Integer.parseInt(args[1]));
 				}
-				
+
 				if (c.equalsIgnoreCase("arenastopcount")) {
 					BattleBane.stopArenaCount();
 				}
@@ -110,7 +106,14 @@ public class Bane implements CommandExecutor {
 				if (c.equalsIgnoreCase("endarena")) {
 					BattleBane.endArena(null);
 				}
-				
+
+				if (c.equalsIgnoreCase("setneeded")) {
+					BattleBane.pointsNeeded = Integer.parseInt(args[1]);
+					Score max = BattleBane.score.getObjective("Points").getScore(
+							Bukkit.getOfflinePlayer("§7 Points Needed"));
+					max.setScore(BattleBane.pointsNeeded);
+				}
+
 				if (c.equalsIgnoreCase("save")) {
 					Bukkit.broadcastMessage("Saving build world...");
 					for (Player p2 : Bukkit.getOnlinePlayers()) {
@@ -118,23 +121,23 @@ public class Bane implements CommandExecutor {
 							p2.teleport(BattleBane.lob().getSpawnLocation());
 						}
 					}
-					
+
 					BattleBane.areBuild().save();
-					
+
 					Bukkit.unloadWorld("BattleBaneArenaBuild", true);
 					BattleBane.deleteWorld("BattleBaneArenaBackup");
 					BattleBane.copyWorld("BattleBaneArenaBuild", "BattleBaneArenaBackup");
 					new WorldCreator("BattleBaneArenaBuild").createWorld();
 				}
-				
+
 				if (c.equalsIgnoreCase("reloadArena")) {
 					BattleBane.resetArena(false);
 				}
-				
+
 				if (c.equalsIgnoreCase("restart")) {
 					restart();
 				}
-				
+
 				if (c.equalsIgnoreCase("center")) {
 					BattleBane.generateCenter();
 				}
@@ -143,7 +146,7 @@ public class Bane implements CommandExecutor {
 
 		return false;
 	}
-	
+
 	public static void restart() {
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.kickPlayer("§e§lServer Restarting");
