@@ -75,6 +75,9 @@ public enum ArcherSettings {
 			Button b = new Button(true, as.icon, as.am, 0, as.name, "", "Click to use");
 			b.setOnClick(new ButtonRunnable() {
 				public void run(Player p, InventoryClickEvent event) {
+					if (p.getItemInHand().getType() != Material.BOW) {
+						return;
+					}
 					p.setItemInHand(as.setItemTo(p.getItemInHand()));
 				}
 			});
