@@ -47,7 +47,7 @@ public enum BBKit {
 		1,
 		0,
 		new ItemStack(Material.BOW),
-		new ItemStack(Material.ARROW, 15));
+		new ItemStack(Material.ARROW, 30));
 
 	protected static HashMap<String, BBKit>	used	= new HashMap<>();
 

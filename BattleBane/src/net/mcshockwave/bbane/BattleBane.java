@@ -312,6 +312,9 @@ public class BattleBane extends JavaPlugin {
 		}
 		if (teams <= 1) {
 			MCShockwave.broadcast("Not enough %s for the Arena!", "teams");
+			if (autoArena) {
+				startArenaCount(ARENA_TIME);
+			}
 			return;
 		}
 

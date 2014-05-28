@@ -156,7 +156,16 @@ public class Bane implements CommandExecutor {
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.kickPlayer("§e§lServer Restarting");
 		}
-		BattleBane.deleteWorld(BattleBane.wor());
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
+
+		Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
+			public void run() {
+				BattleBane.deleteWorld(BattleBane.wor());
+			}
+		}, 10l);
+		Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
+			public void run() {
+				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
+			}
+		}, 20l);
 	}
 }
