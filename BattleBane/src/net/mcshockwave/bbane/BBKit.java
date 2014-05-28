@@ -108,9 +108,7 @@ public enum BBKit {
 			p.getInventory().setItem(0, ArcherSettings.Single_Shot.setItemTo(p.getInventory().getItem(0)));
 		}
 
-		if (this == Civilian) {
-			p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0));
-		}
+		p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, this == Civilian ? 1 : 0));
 	}
 
 	public boolean isKit(Player p) {

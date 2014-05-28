@@ -6,6 +6,7 @@ import net.mcshockwave.MCS.SQLTable.Rank;
 import net.mcshockwave.bbane.commands.Bane;
 import net.mcshockwave.bbane.commands.BuildWorld;
 import net.mcshockwave.bbane.commands.ClassCmd;
+import net.mcshockwave.bbane.commands.PrivateChest;
 import net.mcshockwave.bbane.commands.Surface;
 import net.mcshockwave.bbane.teams.BBTeam;
 
@@ -46,6 +47,8 @@ import com.sk89q.worldedit.schematic.SchematicFormat;
 
 public class BattleBane extends JavaPlugin {
 
+	protected static final int	ARENA_TIME		= 600;
+
 	static Random				rand			= new Random();
 
 	public static BattleBane	ins;
@@ -53,9 +56,12 @@ public class BattleBane extends JavaPlugin {
 	public static Scoreboard	score;
 
 	public static boolean		started			= true, arena = false;
+
+	public static boolean		autoArena		= false;
+
 	public static Arena			currentArena	= null;
 
-	public static int		pointsNeeded	= 5;
+	public static int			pointsNeeded	= 5;
 
 	public static int			centerOrigin	= 64;
 
@@ -93,6 +99,7 @@ public class BattleBane extends JavaPlugin {
 		getCommand("surface").setExecutor(new Surface());
 		getCommand("buildworld").setExecutor(new BuildWorld());
 		getCommand("class").setExecutor(new ClassCmd());
+		getCommand("chest").setExecutor(new PrivateChest());
 
 		new WorldCreator("BattleBaneLobby").type(WorldType.FLAT).createWorld();
 		new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
@@ -347,16 +354,18 @@ public class BattleBane extends JavaPlugin {
 			MCShockwave.broadcast(winner.c, "%s has won on arena %s", winner.name(), currentArena.name);
 			winner.points.setScore(winner.points.getScore() + 1);
 			if (winner.points.getScore() >= pointsNeeded) {
-				Bukkit.broadcastMessage("");
-				Bukkit.broadcastMessage("");
-				Bukkit.broadcastMessage("");
-				Bukkit.broadcastMessage("");
-				Bukkit.broadcastMessage(winner.c + "§l" + winner.name().toUpperCase() + " TEAM WINS THE GAME!");
-				Bukkit.broadcastMessage(winner.c + "§lServer restarting soon!");
-				Bukkit.broadcastMessage("");
-				Bukkit.broadcastMessage("");
-				Bukkit.broadcastMessage("");
-				Bukkit.broadcastMessage("");
+				Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+					public void run() {
+						for (int i = 0; i < 4; i++)
+							Bukkit.broadcastMessage("");
+						Bukkit.broadcastMessage(winner.c + "§l§m-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+						Bukkit.broadcastMessage(winner.c + "§l" + winner.name().toUpperCase() + " TEAM WINS THE GAME!");
+						Bukkit.broadcastMessage(winner.c + "§lServer restarting soon!");
+						Bukkit.broadcastMessage(winner.c + "§l§m-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+						for (int i = 0; i < 3; i++)
+							Bukkit.broadcastMessage("");
+					}
+				}, 2);
 			}
 		} else {
 			MCShockwave.broadcast("%s has won on arena %s", "Nobody", currentArena.name);
@@ -369,6 +378,35 @@ public class BattleBane extends JavaPlugin {
 		}, 100l);
 
 		currentArena = null;
+	}
+
+	public static void restartCountdown(int time) {
+		int[] br = { 60, 45, 30, 15, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+
+		for (final int i : br) {
+			if (i >= time) {
+				continue;
+			}
+
+			int timeSec = time - i;
+			Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+				public void run() {
+					MCShockwave.broadcast(ChatColor.YELLOW, "Server restarting in %s second" + (i != 1 ? "s" : ""), i);
+				}
+			}, timeSec * 20);
+		}
+
+		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+			public void run() {
+				Bukkit.broadcastMessage("§e§l§oSERVER RESTARTING!");
+			}
+		}, time * 20);
+
+		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+			public void run() {
+				Bane.restart();
+			}
+		}, (time * 20) + 10);
 	}
 
 	public static void resetArena(final boolean win) {
@@ -401,10 +439,16 @@ public class BattleBane extends JavaPlugin {
 					return;
 				} else {
 					sendToMods("§aArena successfully generated");
+
+					if (autoArena && !win) {
+						startArenaCount(ARENA_TIME);
+
+						generateCenter();
+					}
 				}
 
 				if (win) {
-					Bane.restart();
+					restartCountdown(15);
 				}
 
 				System.out.println("Done resetting world!");

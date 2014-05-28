@@ -57,12 +57,12 @@ import java.util.Random;
 
 public class DefaultListener implements Listener {
 
-	Random								rand		= new Random();
+	Random										rand		= new Random();
 
 	public static HashMap<TNTPrimed, String>	demo		= new HashMap<>();
 
-	public HashMap<Block, String>		pyro		= new HashMap<>();
-	public HashMap<String, String>		pyroIgnite	= new HashMap<>();
+	public HashMap<Block, String>				pyro		= new HashMap<>();
+	public HashMap<String, String>				pyroIgnite	= new HashMap<>();
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
@@ -164,6 +164,10 @@ public class DefaultListener implements Listener {
 		ItemStack it = event.getItemDrop().getItemStack();
 
 		if (it != null && it.getType() != Material.AIR) {
+			if (p.getWorld() == BattleBane.lob() && p.getGameMode() != GameMode.CREATIVE) {
+				event.setCancelled(true);
+			}
+			
 			if (ItemMetaUtils.hasLore(it) && ItemMetaUtils.getLoreArray(it)[0].equalsIgnoreCase("񘿾Kit Item")) {
 				event.getItemDrop().remove();
 				p.playSound(p.getLocation(), Sound.ANVIL_LAND, 1, 2);
@@ -446,21 +450,45 @@ public class DefaultListener implements Listener {
 			return;
 		}
 
-		if (BBKit.Miner.isKit(p)) {
-			event.setCancelled(true);
-			Material or = b.getType();
+		int mult = BBKit.Miner.isKit(p) ? 5 : 4;
 
-			if ((or == Material.IRON_ORE || or == Material.GOLD_ORE) && rand.nextInt(4) == 0) {
-				if (or == Material.IRON_ORE) {
-					b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.IRON_INGOT));
-				}
-				if (or == Material.GOLD_ORE) {
-					b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.GOLD_INGOT));
-				}
-				b.getWorld().playEffect(b.getLocation(), Effect.MOBSPAWNER_FLAMES, 0);
-				b.breakNaturally(null);
-			} else {
-				b.breakNaturally(p.getItemInHand().clone());
+		if (b.getType() == Material.IRON_ORE) {
+			b.breakNaturally(null);
+			event.setExpToDrop(4);
+			for (int i = 0; i < mult; i++) {
+				b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.IRON_INGOT));
+			}
+		}
+
+		if (b.getType() == Material.GOLD_ORE) {
+			b.breakNaturally(null);
+			event.setExpToDrop(8);
+			for (int i = 0; i < mult; i++) {
+				b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.GOLD_INGOT));
+			}
+		}
+
+		if (b.getType() == Material.COAL_ORE) {
+			for (int i = 0; i < mult - 1; i++) {
+				b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.COAL));
+			}
+		}
+
+		if (b.getType() == Material.EMERALD_ORE) {
+			for (int i = 0; i < mult - 1; i++) {
+				b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.EMERALD));
+			}
+		}
+
+		if (b.getType() == Material.REDSTONE_ORE) {
+			for (int i = 0; i < (mult - 1) * 5; i++) {
+				b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.REDSTONE));
+			}
+		}
+
+		if (b.getType() == Material.LAPIS_ORE) {
+			for (int i = 0; i < (mult - 1) * 7; i++) {
+				b.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(Material.INK_SACK, 1, (short) 4));
 			}
 		}
 	}

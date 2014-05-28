@@ -9,3 +9,4 @@ commands:
    surface:
    buildworld:
    class:
+   chest:

@@ -83,6 +83,11 @@ public class Bane implements CommandExecutor {
 					p.sendMessage("§aStarted is now " + BattleBane.started);
 				}
 
+				if (c.equalsIgnoreCase("togauto")) {
+					BattleBane.autoArena = !BattleBane.autoArena;
+					p.sendMessage("§aAuto Arena is now " + BattleBane.autoArena);
+				}
+
 				if (c.equalsIgnoreCase("giveselectors")) {
 					for (Player p2 : Bukkit.getOnlinePlayers()) {
 						if (BBTeam.getTeamFor(p2) == null) {
