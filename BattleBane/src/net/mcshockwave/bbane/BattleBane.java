@@ -74,6 +74,17 @@ public class BattleBane extends JavaPlugin {
 		ins = this;
 		Bukkit.getPluginManager().registerEvents(new DefaultListener(), this);
 
+		new WorldCreator("BattleBaneLobby").type(WorldType.FLAT).createWorld();
+		new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
+		new WorldCreator("BattleBaneArenaBuild").type(WorldType.FLAT).createWorld();
+		genWorld();
+
+		centerOrigin = wor().getHighestBlockYAt(0, 0);
+
+		for (BBTeam bbt : BBTeam.values()) {
+			bbt.points.setScore(0);
+		}
+
 		score.resetScores(Bukkit.getOfflinePlayer("§dTime:"));
 		time = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§dTime:"));
 
@@ -87,11 +98,6 @@ public class BattleBane extends JavaPlugin {
 
 		MCShockwave.min = Rank.OBSIDIAN;
 
-		for (BBTeam bbt : BBTeam.values()) {
-			bbt.setOrigin();
-			bbt.points.setScore(0);
-		}
-
 		Score max = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§7 Points Needed"));
 		max.setScore(pointsNeeded);
 
@@ -100,13 +106,6 @@ public class BattleBane extends JavaPlugin {
 		getCommand("buildworld").setExecutor(new BuildWorld());
 		getCommand("class").setExecutor(new ClassCmd());
 		getCommand("chest").setExecutor(new PrivateChest());
-
-		new WorldCreator("BattleBaneLobby").type(WorldType.FLAT).createWorld();
-		new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
-		new WorldCreator("BattleBaneArenaBuild").type(WorldType.FLAT).createWorld();
-		genWorld();
-
-		centerOrigin = wor().getHighestBlockYAt(0, 0);
 	}
 
 	public void onDisable() {
@@ -225,7 +224,7 @@ public class BattleBane extends JavaPlugin {
 		}
 
 		for (BBTeam bbt : BBTeam.values()) {
-			bbt.setOrigin();
+			bbt.setOrigin(bbt.yoff);
 		}
 
 		wor().setSpawnLocation(0, wor().getHighestBlockYAt(0, 0) + 1, 0);
@@ -264,6 +263,10 @@ public class BattleBane extends JavaPlugin {
 			final int timeLeft = i;
 			arenaTasks.add(Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 				public void run() {
+					if (timeLeft == startTime / 2) {
+						generateCenter();
+					}
+
 					if (timeLeft > 60) {
 						MCShockwave.broadcast(ChatColor.YELLOW, "%s minutes until the arena starts!", timeLeft / 60);
 					} else
@@ -311,7 +314,7 @@ public class BattleBane extends JavaPlugin {
 			}
 		}
 		if (teams <= 1) {
-			MCShockwave.broadcast("Not enough %s for the Arena!", "teams");
+			MCShockwave.broadcast("Not enough %s for the Arena! (%s / 2 needed)", "teams", teams);
 			if (autoArena) {
 				startArenaCount(ARENA_TIME);
 			}
@@ -367,8 +370,16 @@ public class BattleBane extends JavaPlugin {
 						Bukkit.broadcastMessage(winner.c + "§l§m-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
 						for (int i = 0; i < 3; i++)
 							Bukkit.broadcastMessage("");
+
+						for (Player p : Bukkit.getOnlinePlayers()) {
+							p.playSound(p.getLocation(), Sound.ENDERDRAGON_DEATH, 100, 0.75f);
+						}
 					}
 				}, 2);
+			} else {
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					p.playSound(p.getLocation(), Sound.WITHER_DEATH, 100, 1.5f);
+				}
 			}
 		} else {
 			MCShockwave.broadcast("%s has won on arena %s", "Nobody", currentArena.name);
@@ -387,7 +398,7 @@ public class BattleBane extends JavaPlugin {
 		int[] br = { 60, 45, 30, 15, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
 
 		for (final int i : br) {
-			if (i >= time) {
+			if (i > time) {
 				continue;
 			}
 

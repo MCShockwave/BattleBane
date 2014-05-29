@@ -26,21 +26,25 @@ public enum BBTeam {
 
 	Red(
 		500,
+		3,
 		500,
 		ChatColor.RED,
 		14),
 	Blue(
 		500,
+		2,
 		-500,
 		ChatColor.AQUA,
 		3),
 	Yellow(
 		-500,
+		3,
 		500,
 		ChatColor.YELLOW,
 		4),
 	Green(
 		-500,
+		2,
 		-500,
 		ChatColor.GREEN,
 		5);
@@ -48,6 +52,7 @@ public enum BBTeam {
 	public Score		yorig;
 
 	public int			x;
+	public int			yoff;
 	public int			z;
 	public ChatColor	c;
 	public short		data;
@@ -57,14 +62,16 @@ public enum BBTeam {
 	public Team			team;
 
 	@SuppressWarnings("deprecation")
-	private BBTeam(int x, int z, ChatColor c, int data) {		
+	private BBTeam(int x, int yoffset, int z, ChatColor c, int data) {
 		this.x = x;
 		this.z = z;
 		this.c = c;
 
 		this.data = (short) data;
 
-		setOrigin();
+		this.yoff = yoffset;
+
+		setOrigin(yoffset);
 
 		Team t = BattleBane.score.getTeam(name());
 		if (t != null) {
@@ -90,7 +97,7 @@ public enum BBTeam {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void setOrigin() {
+	public void setOrigin(int yoffset) {
 		Objective ob = BattleBane.score.getObjective("Origin");
 		if (ob == null) {
 			ob = BattleBane.score.registerNewObjective("Origin", "dummy");
@@ -98,12 +105,12 @@ public enum BBTeam {
 
 		yorig = ob.getScore(Bukkit.getOfflinePlayer(name()));
 		if (yorig.getScore() == 0) {
-			yorig.setScore(BattleBane.wor().getHighestBlockYAt(x, z));
+			yorig.setScore(BattleBane.wor().getHighestBlockYAt(x, z) + yoffset);
 		}
 	}
 
 	public Location getSpawn() {
-		return getSchemOrigin().add(3.5, 3, 0.5);
+		return getSchemOrigin().add(3.5, 1, 0.5);
 	}
 
 	public Location getSchemOrigin() {
@@ -111,7 +118,7 @@ public enum BBTeam {
 	}
 
 	public Location getThroneRoom() {
-		return getSchemOrigin().add(0.5, 7, 0.5);
+		return getSchemOrigin().add(0.5, 5, 0.5);
 	}
 
 	public List<Player> getOnline() {

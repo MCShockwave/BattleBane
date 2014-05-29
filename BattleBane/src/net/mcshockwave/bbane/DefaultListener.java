@@ -48,6 +48,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -151,6 +153,9 @@ public class DefaultListener implements Listener {
 				public void run() {
 					BBKit c = BBKit.getClassFor(p);
 					c.giveKit(p);
+
+					p.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 100, 100));
+					p.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 100, 100));
 				}
 			}, 10l);
 		} else {
@@ -167,7 +172,7 @@ public class DefaultListener implements Listener {
 			if (p.getWorld() == BattleBane.lob() && p.getGameMode() != GameMode.CREATIVE) {
 				event.setCancelled(true);
 			}
-			
+
 			if (ItemMetaUtils.hasLore(it) && ItemMetaUtils.getLoreArray(it)[0].equalsIgnoreCase("񘿾Kit Item")) {
 				event.getItemDrop().remove();
 				p.playSound(p.getLocation(), Sound.ANVIL_LAND, 1, 2);
@@ -194,7 +199,7 @@ public class DefaultListener implements Listener {
 				}
 			}
 
-			double hp = 10 / nearby.size();
+			double hp = 8 / nearby.size();
 			for (Player n : nearby) {
 				double hea = n.getHealth();
 				hea += hp;
@@ -266,7 +271,7 @@ public class DefaultListener implements Listener {
 				}
 			}
 
-			double hp = 20 / nearby.size();
+			double hp = 12 / nearby.size();
 			for (Player n : nearby) {
 				double hea = n.getHealth();
 				hea += hp;

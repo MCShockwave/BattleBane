@@ -3,6 +3,7 @@ package net.mcshockwave.bbane;
 import net.mcshockwave.MCS.Utils.LocUtils;
 
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Giant;
@@ -40,6 +41,8 @@ public enum CenterEvent {
 
 	public void onStart() {
 		Location center = new Location(BattleBane.wor(), 0, BattleBane.centerOrigin, 0);
+
+		center.getWorld().playSound(center, Sound.ENDERDRAGON_GROWL, 1000, 0);
 
 		BattleBane.loadSchematic(getSchematic(), center);
 

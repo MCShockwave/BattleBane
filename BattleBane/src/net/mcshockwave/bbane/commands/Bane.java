@@ -157,15 +157,20 @@ public class Bane implements CommandExecutor {
 			p.kickPlayer("§e§lServer Restarting");
 		}
 
+		for (BBTeam bbt : BBTeam.values()) {
+			bbt.points.setScore(0);
+			bbt.yorig.setScore(0);
+		}
+
 		Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
 			public void run() {
 				BattleBane.deleteWorld(BattleBane.wor());
 			}
-		}, 10l);
+		}, 50l);
 		Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
 			public void run() {
 				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
 			}
-		}, 20l);
+		}, 100l);
 	}
 }
