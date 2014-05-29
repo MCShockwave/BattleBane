@@ -122,17 +122,21 @@ public class BattleBane extends JavaPlugin {
 		genWorld();
 	}
 
-	public static void deleteWorld(String w) {
+	public static void deleteWorld(final String w) {
 		if (Bukkit.unloadWorld(w, false)) {
 			System.out.println("Unloaded world");
 		} else {
 			System.err.println("Couldn't unload world");
 		}
-		if (delete(new File(w))) {
-			System.out.println("Deleted world!");
-		} else {
-			System.err.println("Couldn't delete world");
-		}
+		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+			public void run() {
+				if (delete(new File(w))) {
+					System.out.println("Deleted world!");
+				} else {
+					System.err.println("Couldn't delete world");
+				}
+			}
+		}, 10l);
 	}
 
 	public static void deleteWorld(World w) {
@@ -321,22 +325,26 @@ public class BattleBane extends JavaPlugin {
 			return;
 		}
 
-		arena = true;
-
 		Arena ar = Arena.values()[rand.nextInt(Arena.values().length)];
+		MCShockwave.broadcast("Arena started on %s", ar.name);
+
+		arena = true;
 
 		currentArena = ar;
 
+		Bukkit.broadcastMessage("§6§lCompetitors:");
 		for (BBTeam bbt : BBTeam.values()) {
 			List<Player> ready = getArenaReady(bbt);
 			if (ready.size() > 0) {
+				String pls = "";
 				for (Player p : ready) {
 					ar.teleport(p, bbt);
+
+					pls += p.getName() + ", ";
 				}
+				Bukkit.broadcastMessage(bbt.c + bbt.name() + ": §f" + pls.substring(0, pls.length() - 2));
 			}
 		}
-
-		MCShockwave.broadcast("Arena started on %s", ar.name);
 	}
 
 	public static void endArena(final BBTeam winner) {
@@ -364,15 +372,18 @@ public class BattleBane extends JavaPlugin {
 					public void run() {
 						for (int i = 0; i < 4; i++)
 							Bukkit.broadcastMessage("");
-						Bukkit.broadcastMessage(winner.c + "§l§m-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+						Bukkit.broadcastMessage(winner.c + "§l§m-=-=-=-=-=-=-=-=-=-=-=-");
 						Bukkit.broadcastMessage(winner.c + "§l" + winner.name().toUpperCase() + " TEAM WINS THE GAME!");
 						Bukkit.broadcastMessage(winner.c + "§lServer restarting soon!");
-						Bukkit.broadcastMessage(winner.c + "§l§m-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+						Bukkit.broadcastMessage(winner.c + "§l§m-=-=-=-=-=-=-=-=-=-=-=-");
 						for (int i = 0; i < 3; i++)
 							Bukkit.broadcastMessage("");
 
 						for (Player p : Bukkit.getOnlinePlayers()) {
 							p.playSound(p.getLocation(), Sound.ENDERDRAGON_DEATH, 100, 0.75f);
+
+							p.setAllowFlight(true);
+							p.sendMessage("§3You can now fly!");
 						}
 					}
 				}, 2);
@@ -462,7 +473,7 @@ public class BattleBane extends JavaPlugin {
 				}
 
 				if (win) {
-					restartCountdown(15);
+					restartCountdown(30);
 				}
 
 				System.out.println("Done resetting world!");

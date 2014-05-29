@@ -77,7 +77,7 @@ public enum BBKit {
 				return cs;
 			}
 		}
-		return null;
+		return Civilian;
 	}
 
 	public static void giveSelectors(Player p) {

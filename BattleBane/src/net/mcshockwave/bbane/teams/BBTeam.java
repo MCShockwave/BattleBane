@@ -32,7 +32,7 @@ public enum BBTeam {
 		14),
 	Blue(
 		500,
-		2,
+		3,
 		-500,
 		ChatColor.AQUA,
 		3),
@@ -110,7 +110,7 @@ public enum BBTeam {
 	}
 
 	public Location getSpawn() {
-		return getSchemOrigin().add(3.5, 1, 0.5);
+		return getSchemOrigin().add(3.5, 2, 0.5);
 	}
 
 	public Location getSchemOrigin() {
