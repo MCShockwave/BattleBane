@@ -558,11 +558,22 @@ public class DefaultListener implements Listener {
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player p = event.getPlayer();
 		Location to = event.getTo();
+		Location fr = event.getFrom();
 
 		if (to.getWorld() == BattleBane.lob() && to.getY() < 55 && p.getGameMode() != GameMode.CREATIVE) {
 			BattleBane.resetPlayer(p, true);
 			p.teleport(BattleBane.lob().getSpawnLocation());
 			BBKit.giveSelectors(p);
+		}
+
+		BBTeam bbt = BBTeam.getTeamFor(p);
+		if (BattleBane.isInThroneRoom(fr, bbt) && !BattleBane.isInThroneRoom(to, bbt)) {
+			p.sendMessage("§eYou have left your throne room!");
+			p.playSound(p.getLocation(), Sound.NOTE_BASS, 10, 0);
+		}
+		if (!BattleBane.isInThroneRoom(fr, bbt) && BattleBane.isInThroneRoom(to, bbt)) {
+			p.sendMessage("§eYou have entered your throne room!");
+			p.playSound(p.getLocation(), Sound.NOTE_PLING, 10, 1.5f);
 		}
 	}
 

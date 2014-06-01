@@ -508,15 +508,18 @@ public class BattleBane extends JavaPlugin {
 
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			if (te.isTeam(p)) {
-				if (p.getWorld() == te.getSpawn().getWorld()
-						&& p.getLocation().distanceSquared(te.getThroneRoom()) < 16 * 16
-						&& p.getLocation().getY() > te.getThroneRoom().getY()) {
+				if (isInThroneRoom(p.getLocation(), te)) {
 					pl.add(p);
 				}
 			}
 		}
 
 		return pl;
+	}
+
+	public static boolean isInThroneRoom(Location l, BBTeam bbt) {
+		return l.getWorld() == bbt.getSpawn().getWorld() && l.distanceSquared(bbt.getThroneRoom()) < 16 * 16
+				&& l.getY() > bbt.getThroneRoom().getY();
 	}
 
 	public static void generateCenter() {
