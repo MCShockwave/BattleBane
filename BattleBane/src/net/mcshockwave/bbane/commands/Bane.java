@@ -131,8 +131,12 @@ public class Bane implements CommandExecutor {
 
 					Bukkit.unloadWorld("BattleBaneArenaBuild", true);
 					BattleBane.deleteWorld("BattleBaneArenaBackup");
-					BattleBane.copyWorld("BattleBaneArenaBuild", "BattleBaneArenaBackup");
-					new WorldCreator("BattleBaneArenaBuild").createWorld();
+					Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
+						public void run() {
+							BattleBane.copyWorld("BattleBaneArenaBuild", "BattleBaneArenaBackup");
+							new WorldCreator("BattleBaneArenaBuild").createWorld();
+						}
+					}, 11l);
 				}
 
 				if (c.equalsIgnoreCase("reloadArena")) {

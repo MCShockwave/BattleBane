@@ -518,6 +518,9 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static boolean isInThroneRoom(Location l, BBTeam bbt) {
+		if (bbt == null) {
+			return false;
+		}
 		return l.getWorld() == bbt.getSpawn().getWorld() && l.distanceSquared(bbt.getThroneRoom()) < 16 * 16
 				&& l.getY() > bbt.getThroneRoom().getY();
 	}
