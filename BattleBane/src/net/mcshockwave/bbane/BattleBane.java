@@ -48,6 +48,7 @@ import com.sk89q.worldedit.schematic.SchematicFormat;
 public class BattleBane extends JavaPlugin {
 
 	protected static final int	ARENA_TIME		= 600;
+	public static int			POINTS_NEEDED	= 3;
 
 	static Random				rand			= new Random();
 
@@ -60,8 +61,6 @@ public class BattleBane extends JavaPlugin {
 	public static boolean		autoArena		= false;
 
 	public static Arena			currentArena	= null;
-
-	public static int			pointsNeeded	= 5;
 
 	public static int			centerOrigin	= 64;
 
@@ -99,7 +98,7 @@ public class BattleBane extends JavaPlugin {
 		MCShockwave.min = Rank.OBSIDIAN;
 
 		Score max = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§7 Points Needed"));
-		max.setScore(pointsNeeded);
+		max.setScore(POINTS_NEEDED);
 
 		getCommand("bane").setExecutor(new Bane());
 		getCommand("surface").setExecutor(new Surface());
@@ -367,7 +366,7 @@ public class BattleBane extends JavaPlugin {
 		if (winner != null) {
 			MCShockwave.broadcast(winner.c, "%s has won on arena %s", winner.name(), currentArena.name);
 			winner.points.setScore(winner.points.getScore() + 1);
-			if (winner.points.getScore() >= pointsNeeded) {
+			if (winner.points.getScore() >= POINTS_NEEDED) {
 				Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 					public void run() {
 						for (int i = 0; i < 4; i++)
@@ -398,7 +397,7 @@ public class BattleBane extends JavaPlugin {
 
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
-				resetArena(winner.points.getScore() >= pointsNeeded);
+				resetArena(winner.points.getScore() >= POINTS_NEEDED);
 			}
 		}, 100l);
 

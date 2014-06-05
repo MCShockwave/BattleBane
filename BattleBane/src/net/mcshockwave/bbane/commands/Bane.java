@@ -113,10 +113,10 @@ public class Bane implements CommandExecutor {
 				}
 
 				if (c.equalsIgnoreCase("setneeded")) {
-					BattleBane.pointsNeeded = Integer.parseInt(args[1]);
+					BattleBane.POINTS_NEEDED = Integer.parseInt(args[1]);
 					Score max = BattleBane.score.getObjective("Points").getScore(
 							Bukkit.getOfflinePlayer("§7 Points Needed"));
-					max.setScore(BattleBane.pointsNeeded);
+					max.setScore(BattleBane.POINTS_NEEDED);
 				}
 
 				if (c.equalsIgnoreCase("save")) {
