@@ -44,9 +44,9 @@ public enum BBKit {
 		0,
 		new ItemStack(Material.SNOW_BALL, 5)),
 	Medic(
-		Material.GOLDEN_APPLE,
+		Material.POTION,
 		1,
-		0),
+		8197),
 	Bat(
 		Material.FEATHER,
 		1,
