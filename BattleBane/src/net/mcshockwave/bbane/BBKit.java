@@ -33,13 +33,22 @@ public enum BBKit {
 		3,
 		0,
 		new ItemStack(Material.TNT, 3)),
-	Pyro(
-		Material.FLINT_AND_STEEL,
+	Assassin(
+		Material.COMPASS,
 		1,
 		0,
-		new ItemStack(Material.FLINT_AND_STEEL)),
+		new ItemStack(Material.COMPASS)),
+	Golem(
+		Material.PUMPKIN,
+		1,
+		0,
+		new ItemStack(Material.SNOW_BALL, 5)),
 	Medic(
 		Material.GOLDEN_APPLE,
+		1,
+		0),
+	Bat(
+		Material.FEATHER,
 		1,
 		0),
 	Archer(
@@ -47,7 +56,12 @@ public enum BBKit {
 		1,
 		0,
 		new ItemStack(Material.BOW),
-		new ItemStack(Material.ARROW, 30));
+		new ItemStack(Material.ARROW, 30)),
+	Pyro(
+		Material.FLINT_AND_STEEL,
+		1,
+		0,
+		new ItemStack(Material.FLINT_AND_STEEL));
 
 	protected static HashMap<String, BBKit>	used	= new HashMap<>();
 
