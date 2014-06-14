@@ -4,6 +4,7 @@ import net.mcshockwave.MCS.MCShockwave;
 import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
 import net.mcshockwave.MCS.Currency.PointsUtils;
+import net.mcshockwave.MCS.Utils.ItemMetaUtils;
 import net.mcshockwave.bbane.commands.Bane;
 import net.mcshockwave.bbane.commands.BuildWorld;
 import net.mcshockwave.bbane.commands.ClassCmd;
@@ -23,12 +24,14 @@ import org.bukkit.WorldType;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -112,10 +115,46 @@ public class BattleBane extends JavaPlugin {
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
 				startArenaCount(ARENA_TIME);
-				
+
 				wor().setTime(0);
 			}
 		}, 50l);
+
+		Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
+			public void run() {
+				if (arena) {
+					for (Player p : are().getPlayers()) {
+						int id = p.getInventory().first(Material.COMPASS);
+						if (id != -1) {
+							Player n = getNearestPlayer(p, true);
+							if (n != null) {
+								ItemStack com = p.getInventory().getItem(id);
+								ItemMetaUtils.setItemName(com, "§rPointing to: §b" + n.getName());
+								p.setCompassTarget(n.getLocation());
+							}
+						}
+					}
+				}
+			}
+		}, 10, 10);
+	}
+
+	public static Player getNearestPlayer(Player p, boolean respectTeams) {
+		Team t1 = score.getPlayerTeam(p);
+		double dis = -1;
+		Player n = null;
+		Location l = p.getLocation();
+		for (Player p2 : Bukkit.getOnlinePlayers()) {
+			Team t2 = score.getPlayerTeam(p2);
+			if (!(t1 != null && t2 != null && t1 == t2) && p2.getWorld() == l.getWorld() && p2 != p) {
+				double disQ = p2.getLocation().distanceSquared(l);
+				if (dis == -1 || disQ < dis) {
+					dis = disQ;
+					n = p2;
+				}
+			}
+		}
+		return n;
 	}
 
 	public void onDisable() {
