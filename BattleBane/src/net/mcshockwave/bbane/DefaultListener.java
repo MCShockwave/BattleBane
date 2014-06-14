@@ -46,7 +46,9 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -85,6 +87,23 @@ public class DefaultListener implements Listener {
 
 		if (p.getWorld() == BattleBane.are() && BBTeam.getTeamFor(p) != null) {
 			p.teleport(BBTeam.getTeamFor(p).getSpawn());
+		}
+	}
+
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		onQuit(event.getPlayer());
+	}
+
+	@EventHandler
+	public void onPlayerKick(PlayerKickEvent event) {
+		onQuit(event.getPlayer());
+	}
+
+	public void onQuit(Player p) {
+		if (BattleBane.arena && p.getWorld() == BattleBane.are()) {
+			BattleBane.resetPlayer(p, true);
+			checkIfArenaDone();
 		}
 	}
 
@@ -300,7 +319,7 @@ public class DefaultListener implements Listener {
 
 		pyroIgnite.remove(p.getName());
 
-		if (p.getWorld() == BattleBane.are() && BattleBane.arena) {
+		if (BattleBane.arena && p.getWorld() == BattleBane.are()) {
 			event.setDeathMessage("§8[§a§lARENA§8] §f" + event.getDeathMessage());
 
 			PlayerRespawnEvent ev = new PlayerRespawnEvent(p, BattleBane.lob().getSpawnLocation(), false);
@@ -312,18 +331,26 @@ public class DefaultListener implements Listener {
 			BattleBane.resetPlayer(p, true);
 			p.teleport(ev.getRespawnLocation());
 
-			int tleft = 0;
-			BBTeam win = null;
-			for (BBTeam bbt : BBTeam.values()) {
-				if (BattleBane.getAllInArena(bbt).size() > 0) {
-					win = bbt;
-					tleft++;
+			Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
+				public void run() {
+					checkIfArenaDone();					
 				}
-			}
+			}, 1l);
+		}
+	}
 
-			if (tleft < 2) {
-				BattleBane.endArena(win);
+	public void checkIfArenaDone() {
+		int tleft = 0;
+		BBTeam win = null;
+		for (BBTeam bbt : BBTeam.values()) {
+			if (BattleBane.getAllInArena(bbt).size() > 0) {
+				win = bbt;
+				tleft++;
 			}
+		}
+
+		if (tleft < 2) {
+			BattleBane.endArena(win);
 		}
 	}
 

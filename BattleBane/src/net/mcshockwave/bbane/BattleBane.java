@@ -127,10 +127,13 @@ public class BattleBane extends JavaPlugin {
 						int id = p.getInventory().first(Material.COMPASS);
 						if (id != -1) {
 							Player n = getNearestPlayer(p, true);
+							ItemStack com = p.getInventory().getItem(id);
 							if (n != null) {
-								ItemStack com = p.getInventory().getItem(id);
 								ItemMetaUtils.setItemName(com, "§rPointing to: §b" + n.getName());
 								p.setCompassTarget(n.getLocation());
+							} else {
+								ItemMetaUtils.setItemName(com, "§rPointing to: §bNobody");
+								p.setCompassTarget(p.getLocation());
 							}
 						}
 					}
@@ -364,18 +367,24 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static void startArena() {
-		int teams = 0;
-		for (BBTeam bbt : BBTeam.values()) {
-			if (getArenaReady(bbt).size() > 0) {
-				teams++;
+		startArena(false);
+	}
+
+	public static void startArena(boolean force) {
+		if (!force) {
+			int teams = 0;
+			for (BBTeam bbt : BBTeam.values()) {
+				if (getArenaReady(bbt).size() > 0) {
+					teams++;
+				}
 			}
-		}
-		if (teams <= 1) {
-			MCShockwave.broadcast("Not enough %s for the Arena! (%s / 2 needed)", "teams", teams);
-			if (autoArena) {
-				startArenaCount(ARENA_TIME);
+			if (teams <= 1) {
+				MCShockwave.broadcast("Not enough %s for the Arena! (%s / 2 needed)", "teams", teams);
+				if (autoArena) {
+					startArenaCount(ARENA_TIME);
+				}
+				return;
 			}
-			return;
 		}
 
 		Arena ar = Arena.values()[rand.nextInt(Arena.values().length)];
@@ -392,12 +401,13 @@ public class BattleBane extends JavaPlugin {
 				String pls = "";
 				for (Player p : ready) {
 					ar.teleport(p, bbt);
+					p.getInventory().addItem(new ItemStack(Material.COMPASS));
 
 					pls += p.getName() + ", ";
 				}
 				Bukkit.broadcastMessage(bbt.c + bbt.name() + ": §f" + pls.substring(0, pls.length() - 2));
+				pointsWinArena += ready.size() * 100;
 			}
-			pointsWinArena += ready.size() * 100;
 		}
 	}
 

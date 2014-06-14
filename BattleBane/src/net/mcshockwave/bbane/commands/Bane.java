@@ -107,6 +107,10 @@ public class Bane implements CommandExecutor {
 				if (c.equalsIgnoreCase("startarena")) {
 					BattleBane.startArena();
 				}
+				
+				if (c.equalsIgnoreCase("forcearena")) {
+					BattleBane.startArena(true);
+				}
 
 				if (c.equalsIgnoreCase("endarena")) {
 					BattleBane.endArena(null);

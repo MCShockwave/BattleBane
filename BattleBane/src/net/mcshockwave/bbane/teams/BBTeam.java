@@ -25,9 +25,9 @@ import java.util.List;
 public enum BBTeam {
 
 	Red(
-		500,
+		-500,
 		3,
-		500,
+		-500,
 		ChatColor.RED,
 		14),
 	Blue(
@@ -43,9 +43,9 @@ public enum BBTeam {
 		ChatColor.YELLOW,
 		4),
 	Green(
-		-500,
+		500,
 		2,
-		-500,
+		500,
 		ChatColor.GREEN,
 		5);
 
