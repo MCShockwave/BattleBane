@@ -3,6 +3,7 @@ package net.mcshockwave.bbane;
 import net.mcshockwave.MCS.MCShockwave;
 import net.mcshockwave.MCS.SQLTable;
 import net.mcshockwave.MCS.SQLTable.Rank;
+import net.mcshockwave.MCS.Currency.PointsUtils;
 import net.mcshockwave.bbane.commands.Bane;
 import net.mcshockwave.bbane.commands.BuildWorld;
 import net.mcshockwave.bbane.commands.ClassCmd;
@@ -50,6 +51,8 @@ public class BattleBane extends JavaPlugin {
 	protected static final int	ARENA_TIME		= 600;
 	public static int			POINTS_NEEDED	= 3;
 
+	public static int			pointsWinArena	= 0;
+
 	static Random				rand			= new Random();
 
 	public static BattleBane	ins;
@@ -58,7 +61,7 @@ public class BattleBane extends JavaPlugin {
 
 	public static boolean		started			= true, arena = false;
 
-	public static boolean		autoArena		= false;
+	public static boolean		autoArena		= true;
 
 	public static Arena			currentArena	= null;
 
@@ -100,7 +103,7 @@ public class BattleBane extends JavaPlugin {
 		Score max = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§7 Points Needed"));
 		max.setScore(POINTS_NEEDED);
 
-		getCommand("bane").setExecutor(new Bane());
+		getCommand("bbane").setExecutor(new Bane());
 		getCommand("surface").setExecutor(new Surface());
 		getCommand("buildworld").setExecutor(new BuildWorld());
 		getCommand("class").setExecutor(new ClassCmd());
@@ -252,6 +255,10 @@ public class BattleBane extends JavaPlugin {
 
 			loadSchematic("bb_" + t.name().toLowerCase(), b.getLocation());
 		}
+
+		String fillcmd = "wb " + wor().getName() + " fill ";
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillcmd + "50");
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillcmd + "confirm");
 	}
 
 	public static ArrayList<BukkitTask>	arenaTasks	= new ArrayList<>();
@@ -343,6 +350,7 @@ public class BattleBane extends JavaPlugin {
 				}
 				Bukkit.broadcastMessage(bbt.c + bbt.name() + ": §f" + pls.substring(0, pls.length() - 2));
 			}
+			pointsWinArena += ready.size() * 100;
 		}
 	}
 
@@ -357,11 +365,13 @@ public class BattleBane extends JavaPlugin {
 					resetPlayer(p, true);
 					BBKit.getClassFor(p).giveKit(p);
 					p.teleport(BBTeam.getTeamFor(p).getSpawn());
+					PointsUtils.addPoints(p, pointsWinArena, "winning the arena", true);
 				} else {
 					p.teleport(lob().getSpawnLocation());
 				}
 			}
 		}
+		pointsWinArena = 0;
 
 		if (winner != null) {
 			MCShockwave.broadcast(winner.c, "%s has won on arena %s", winner.name(), currentArena.name);

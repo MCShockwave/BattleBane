@@ -1,5 +1,7 @@
 package net.mcshockwave.bbane;
 
+import net.mcshockwave.MCS.SQLTable;
+import net.mcshockwave.MCS.Currency.LevelUtils;
 import net.mcshockwave.MCS.Utils.ItemMetaUtils;
 import net.mcshockwave.MCS.Utils.PacketUtils;
 import net.mcshockwave.MCS.Utils.PacketUtils.ParticleEffect;
@@ -244,6 +246,18 @@ public class DefaultListener implements Listener {
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event) {
 		Player p = event.getEntity();
+
+		if (p.getKiller() != null) {
+			Player k = p.getKiller();
+			Random rand = new Random();
+
+			if (rand.nextInt(SQLTable.Settings.getInt("Setting", "XPChance", "Value")) == 0) {
+				int minXp = SQLTable.Settings.getInt("Setting", "XPMin", "Value");
+				int maxXp = SQLTable.Settings.getInt("Setting", "XPMax", "Value");
+				LevelUtils.addXP(k, (rand.nextInt(maxXp - minXp) + minXp) * (k.getWorld() == BattleBane.wor() ? 2 : 1),
+						"killing " + p.getName(), true);
+			}
+		}
 
 		for (ItemStack it : event.getDrops().toArray(new ItemStack[0])) {
 			if (it != null && it.getType() != Material.AIR) {

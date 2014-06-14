@@ -5,7 +5,7 @@ author: Blaxcraft
 description: Alpha - WorldGen/Teams/Arena
 depend: [MCShockwave, TerrainControl]
 commands:
-   bane:
+   bbane:
    surface:
    buildworld:
    class:
