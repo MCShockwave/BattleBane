@@ -101,8 +101,6 @@ public class BattleBane extends JavaPlugin {
 			BBKit.giveSelectors(p);
 		}
 
-		MCShockwave.min = Rank.OBSIDIAN;
-
 		Score max = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§7 Points Needed"));
 		max.setScore(POINTS_NEEDED);
 
