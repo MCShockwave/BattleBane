@@ -108,6 +108,14 @@ public class BattleBane extends JavaPlugin {
 		getCommand("buildworld").setExecutor(new BuildWorld());
 		getCommand("class").setExecutor(new ClassCmd());
 		getCommand("chest").setExecutor(new PrivateChest());
+
+		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
+			public void run() {
+				startArenaCount(ARENA_TIME);
+				
+				wor().setTime(0);
+			}
+		}, 50l);
 	}
 
 	public void onDisable() {
