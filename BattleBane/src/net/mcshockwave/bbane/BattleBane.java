@@ -420,7 +420,7 @@ public class BattleBane extends JavaPlugin {
 					resetPlayer(p, true);
 					BBKit.getClassFor(p).giveKit(p);
 					p.teleport(BBTeam.getTeamFor(p).getSpawn());
-					PointsUtils.addPoints(p, pointsWinArena, "winning the arena", true);
+					PointsUtils.addPoints(p, pointsWinArena, "winning the arena");
 				} else {
 					p.teleport(lob().getSpawnLocation());
 				}
