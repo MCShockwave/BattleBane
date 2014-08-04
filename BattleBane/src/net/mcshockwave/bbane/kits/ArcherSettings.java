@@ -9,7 +9,7 @@ import net.mcshockwave.bbane.DefaultListener;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_7_R2.entity.CraftArrow;
+import org.bukkit.craftbukkit.v1_7_R4.entity.CraftArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -87,7 +87,6 @@ public enum ArcherSettings {
 		return im;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void onShoot(final Player p, final EntityShootBowEvent event) {
 		final PlayerInventory pi = p.getInventory();
 

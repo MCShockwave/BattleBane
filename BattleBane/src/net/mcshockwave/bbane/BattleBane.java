@@ -343,7 +343,7 @@ public class BattleBane extends JavaPlugin {
 					if (timeLeft > 10) {
 						time.setScore(timeLeft);
 					} else if (timeLeft == 10) {
-						score.resetScores(time.getPlayer());
+						score.resetScores(time.getEntry());
 					}
 				}
 			}, i * 20));
