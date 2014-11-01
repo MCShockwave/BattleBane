@@ -333,7 +333,7 @@ public class DefaultListener implements Listener {
 
 			Bukkit.getScheduler().runTaskLater(BattleBane.ins, new Runnable() {
 				public void run() {
-					checkIfArenaDone();					
+					checkIfArenaDone();
 				}
 			}, 1l);
 		}
@@ -449,7 +449,7 @@ public class DefaultListener implements Listener {
 
 	@EventHandler
 	public void onEntityTarget(EntityTargetEvent event) {
-		if (!canBuildBase(event.getTarget().getLocation().getBlock())) {
+		if (event.getTarget() != null && !canBuildBase(event.getTarget().getLocation().getBlock())) {
 			event.setTarget(null);
 		}
 	}

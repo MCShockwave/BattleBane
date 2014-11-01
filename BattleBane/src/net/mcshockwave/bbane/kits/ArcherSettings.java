@@ -62,7 +62,7 @@ public enum ArcherSettings {
 	}
 
 	public static ArcherSettings getSetting(ItemStack it) {
-		String set = ItemMetaUtils.getItemName(it).replaceFirst(pre, "");
+		String set = ItemMetaUtils.getItemName(it).replaceFirst(pre, "").replace(' ', '_');
 		return valueOf(set);
 	}
 

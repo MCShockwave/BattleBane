@@ -14,6 +14,7 @@ import net.mcshockwave.bbane.teams.BBTeam;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -28,6 +29,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -72,12 +74,17 @@ public class BattleBane extends JavaPlugin {
 
 	public static Score			time;
 
-	@SuppressWarnings("deprecation")
 	public void onEnable() {
 		score = Bukkit.getScoreboardManager().getMainScoreboard();
 
 		ins = this;
 		Bukkit.getPluginManager().registerEvents(new DefaultListener(), this);
+
+		getCommand("bbane").setExecutor(new Bane());
+		getCommand("surface").setExecutor(new Surface());
+		getCommand("buildworld").setExecutor(new BuildWorld());
+		getCommand("class").setExecutor(new ClassCmd());
+		getCommand("chest").setExecutor(new PrivateChest());
 
 		new WorldCreator("BattleBaneLobby").type(WorldType.FLAT).createWorld();
 		new WorldCreator("BattleBaneArena").type(WorldType.FLAT).createWorld();
@@ -90,8 +97,8 @@ public class BattleBane extends JavaPlugin {
 			bbt.points.setScore(0);
 		}
 
-		score.resetScores(Bukkit.getOfflinePlayer("§dTime:"));
-		time = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§dTime:"));
+		score.resetScores("§dTime:");
+		time = score.getObjective("Points").getScore("§dTime:");
 
 		saveDefaultConfig();
 
@@ -101,14 +108,8 @@ public class BattleBane extends JavaPlugin {
 			BBKit.giveSelectors(p);
 		}
 
-		Score max = score.getObjective("Points").getScore(Bukkit.getOfflinePlayer("§7 Points Needed"));
+		Score max = score.getObjective("Points").getScore("§7 Points Needed");
 		max.setScore(POINTS_NEEDED);
-
-		getCommand("bbane").setExecutor(new Bane());
-		getCommand("surface").setExecutor(new Surface());
-		getCommand("buildworld").setExecutor(new BuildWorld());
-		getCommand("class").setExecutor(new ClassCmd());
-		getCommand("chest").setExecutor(new PrivateChest());
 
 		Bukkit.getScheduler().runTaskLater(ins, new Runnable() {
 			public void run() {
@@ -287,26 +288,48 @@ public class BattleBane extends JavaPlugin {
 			public void run() {
 				genStructures();
 			}
-		}, 50l);
+		}, 100l);
 	}
 
 	public static void genStructures() {
-		Block cen = wor().getHighestBlockAt(0, 0);
-		cen.getChunk().load();
+		final int rad = 3;
 
-		loadSchematic("bb_center", cen.getLocation());
-		centerOrigin = cen.getLocation().getBlockY();
-
-		for (BBTeam t : BBTeam.values()) {
-			Block b = t.getSchemOrigin().getBlock();
-			b.getChunk().load();
-
-			loadSchematic("bb_" + t.name().toLowerCase(), b.getLocation());
+		final Block cen = wor().getHighestBlockAt(0, 0);
+		cen.getChunk().load(true);
+		int cx = cen.getChunk().getX();
+		int cz = cen.getChunk().getZ();
+		for (int x = -rad; x < rad; x++) {
+			for (int z = -rad; z < rad; z++) {
+				Chunk c = wor().getChunkAt(cx + x, cz + z);
+				c.load(true);
+			}
 		}
 
-		String fillcmd = "wb " + wor().getName() + " fill ";
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillcmd + "50");
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillcmd + "confirm");
+		new BukkitRunnable() {
+			public void run() {
+				loadSchematic("bb_center", cen.getLocation());
+				centerOrigin = cen.getLocation().getBlockY();
+
+				for (BBTeam t : BBTeam.values()) {
+					Block b = t.getSchemOrigin().getBlock();
+					b.getChunk().load(true);
+					int cx = b.getChunk().getX();
+					int cz = b.getChunk().getZ();
+					for (int x = -rad; x < rad; x++) {
+						for (int z = -rad; z < rad; z++) {
+							Chunk c = wor().getChunkAt(cx + x, cz + z);
+							c.load(true);
+						}
+					}
+
+					loadSchematic("bb_" + t.name().toLowerCase(), b.getLocation());
+				}
+
+				String fillcmd = "wb " + wor().getName() + " fill ";
+				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillcmd + "50");
+				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), fillcmd + "confirm");
+			}
+		}.runTaskLater(ins, 20);
 	}
 
 	public static ArrayList<BukkitTask>	arenaTasks	= new ArrayList<>();
@@ -334,7 +357,11 @@ public class BattleBane extends JavaPlugin {
 			}, (startTime - i) * 20));
 		}
 
-		time.setScore(startTime);
+		try {
+			time.setScore(startTime);
+		} catch (Exception e) {
+			time = score.getObjective("Points").getScore("§dTime:");
+		}
 
 		for (int i = 0; i < startTime; i++) {
 			final int timeLeft = startTime - i;
@@ -650,7 +677,12 @@ public class BattleBane extends JavaPlugin {
 	}
 
 	public static World wor() {
-		return Bukkit.getWorld("BattleBaneWorld");
+		World w = Bukkit.getWorld("BattleBaneWorld");
+		if (w == null) {
+			Bukkit.createWorld(new WorldCreator("BattleBaneWorld"));
+			return wor();
+		}
+		return w;
 	}
 
 }

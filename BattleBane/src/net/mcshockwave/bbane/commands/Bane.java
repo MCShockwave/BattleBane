@@ -164,6 +164,8 @@ public class Bane implements CommandExecutor {
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.kickPlayer("§e§lServer Restarting");
 		}
+		
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "wb fill cancel");
 
 		for (BBTeam bbt : BBTeam.values()) {
 			bbt.points.setScore(0);

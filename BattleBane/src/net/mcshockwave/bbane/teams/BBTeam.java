@@ -61,7 +61,6 @@ public enum BBTeam {
 
 	public Team			team;
 
-	@SuppressWarnings("deprecation")
 	private BBTeam(int x, int yoffset, int z, ChatColor c, int data) {
 		this.x = x;
 		this.z = z;
@@ -85,7 +84,7 @@ public enum BBTeam {
 		ob.setDisplayName("§6Battle Bane §7Points");
 		ob.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-		points = ob.getScore(Bukkit.getOfflinePlayer(c + name()));
+		points = ob.getScore(c + name());
 		points.setScore(1);
 		points.setScore(0);
 
@@ -93,18 +92,16 @@ public enum BBTeam {
 		team.setPrefix(c.toString());
 		team.setSuffix("§r");
 		team.setAllowFriendlyFire(false);
-		team.setCanSeeFriendlyInvisibles(true);
 	}
 
-	@SuppressWarnings("deprecation")
 	public void setOrigin(int yoffset) {
 		Objective ob = BattleBane.score.getObjective("Origin");
 		if (ob == null) {
 			ob = BattleBane.score.registerNewObjective("Origin", "dummy");
 		}
 
-		yorig = ob.getScore(Bukkit.getOfflinePlayer(name()));
-		if (yorig.getScore() == 0) {
+		yorig = ob.getScore(name());
+		if (yorig.getScore() == 0 && BattleBane.wor() != null) {
 			yorig.setScore(BattleBane.wor().getHighestBlockYAt(x, z) + yoffset);
 		}
 	}
@@ -134,9 +131,21 @@ public enum BBTeam {
 	}
 
 	public void addPlayer(Player p) {
+		boolean first = true;
+		for (BBTeam bbt : values()) {
+			if (bbt.team.getPlayers().size() > 0) {
+				first = false;
+				break;
+			}
+		}
+		
 		team.addPlayer(p);
 		getSpawn().getChunk().load();
 		p.teleport(getSpawn());
+		
+		if (first) {
+			BattleBane.genStructures();
+		}
 
 		if (BBKit.getClassFor(p) != null) {
 			BBKit.getClassFor(p).giveKit(p);
