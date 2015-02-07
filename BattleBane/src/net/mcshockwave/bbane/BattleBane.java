@@ -134,6 +134,7 @@ public class BattleBane extends JavaPlugin {
 								ItemMetaUtils.setItemName(com, "§rPointing to: §bNobody");
 								p.setCompassTarget(p.getLocation());
 							}
+							p.getInventory().setItem(id, com);
 						}
 					}
 				}
